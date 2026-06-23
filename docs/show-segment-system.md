@@ -53,6 +53,18 @@ Defining and applying segments should stay a creator-facing arranging step, not 
 
 A segment change should adapt the episode's structure around it rather than forcing every show into the same fixed format.
 
+## Review States
+
+While arranging segments, each segment should show a clear state so the creator can see what still needs a decision before styling and export:
+
+- ready — the segment is placed with clear start and end points
+- needs boundaries — the segment has no clear start or end in the conversation yet
+- needs a name — still using a default type label instead of a show-specific name
+- empty — no part of the conversation is mapped to the segment
+- skipped — intentionally left out of this episode but kept in the template
+
+These states describe the segment arrangement only. How a segment then shapes chapters, titles, pacing, branding, and metadata stays owned by the specs in Segment Behavior, and a state should surface in long-form review only when it would affect the finished episode.
+
 ## Reuse
 
 Show templates can remember segment order and visual treatment, while each episode can adjust names, topics, guests, and sponsor details.
