@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Contextual B-Roll Moments Prototype</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #16211f;
+        --muted: #5e6b67;
+        --line: #d9e0dd;
+        --panel: #f7faf8;
+        --accent: #136f63;
+        --warn: #a15c00;
+        --block: #a52828;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        background: #ffffff;
+      }
+
+      main {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 32px 20px 48px;
+      }
+
+      h1,
+      h2,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        font-size: 32px;
+        line-height: 1.1;
+        margin-bottom: 8px;
+      }
+
+      .lede {
+        color: var(--muted);
+        max-width: 760px;
+      }
+
+      .workspace {
+        display: grid;
+        grid-template-columns: minmax(0, 1.5fr) minmax(320px, 0.85fr);
+        gap: 24px;
+        margin-top: 28px;
+      }
+
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+        padding: 18px;
+      }
+
+      .moments {
+        display: grid;
+        gap: 14px;
+      }
+
+      .moment {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 14px;
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #ffffff;
+      }
+
+      .fields {
+        display: grid;
+        gap: 10px;
+        align-content: start;
+      }
+
+      .fields-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      label {
+        display: grid;
+        gap: 6px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      input,
+      select {
+        width: 100%;
+        min-height: 40px;
+        border: 1px solid #bfcbc7;
+        border-radius: 6px;
+        background: #ffffff;
+        color: var(--ink);
+        font: inherit;
+        padding: 8px 10px;
+      }
+
+      .head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .head strong {
+        font-size: 14px;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        border-radius: 999px;
+        padding: 0 11px;
+        font-weight: 700;
+        font-size: 13px;
+        white-space: nowrap;
+      }
+
+      .badge.approved {
+        color: #075246;
+        background: #dff5ef;
+      }
+
+      .badge.suggested {
+        color: #2a4c8a;
+        background: #e2ebfb;
+      }
+
+      .badge.review {
+        color: #7a4400;
+        background: #fff1d6;
+      }
+
+      .badge.rejected {
+        color: #5e6b67;
+        background: #eceeed;
+      }
+
+      .status {
+        display: inline-flex;
+        align-items: center;
+        min-height: 32px;
+        border-radius: 999px;
+        padding: 0 12px;
+        font-weight: 800;
+      }
+
+      .status.ready {
+        color: #075246;
+        background: #dff5ef;
+      }
+
+      .status.review {
+        color: #7a4400;
+        background: #fff1d6;
+      }
+
+      .frame {
+        position: relative;
+        width: 116px;
+        aspect-ratio: 16 / 9;
+        flex: none;
+        align-self: start;
+        border-radius: 6px;
+        overflow: hidden;
+        background: linear-gradient(160deg, #6db5a8, #1d554d);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+      }
+
+      .frame .speaker {
+        position: absolute;
+        top: 14%;
+        left: 50%;
+        width: 34%;
+        aspect-ratio: 1;
+        transform: translateX(-50%);
+        border-radius: 50%;
+        background: #e8f4f1;
+      }
+
+      .frame .overlay {
+        position: absolute;
+        right: 7%;
+        bottom: 8%;
+        left: 7%;
+        height: 38%;
+        border-radius: 5px;
+        background: rgba(255, 255, 255, 0.86);
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+      }
+
+      .frame.subtle .overlay {
+        opacity: 0.55;
+        height: 26%;
+      }
+
+      .frame.prominent .overlay {
+        inset: 10% 7% auto;
+        height: 64%;
+      }
+
+      .frame.rejected {
+        filter: grayscale(0.7) brightness(0.9);
+      }
+
+      .frame.rejected .overlay {
+        display: none;
+      }
+
+      .tag {
+        position: absolute;
+        left: 5px;
+        top: 5px;
+        border-radius: 4px;
+        background: rgba(16, 24, 22, 0.8);
+        color: #ffffff;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 2px 6px;
+      }
+
+      .issues {
+        display: grid;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .issue {
+        border-left: 4px solid var(--warn);
+        border-radius: 6px;
+        background: #ffffff;
+        padding: 12px;
+      }
+
+      .issue.info {
+        border-left-color: var(--accent);
+      }
+
+      .issue strong {
+        display: block;
+        margin-bottom: 4px;
+      }
+
+      .issue span {
+        color: var(--muted);
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      button {
+        min-height: 40px;
+        border: 1px solid #0f5d53;
+        border-radius: 6px;
+        background: var(--accent);
+        color: #ffffff;
+        font: inherit;
+        font-weight: 700;
+        padding: 8px 12px;
+        cursor: pointer;
+      }
+
+      button.secondary {
+        background: #ffffff;
+        color: var(--accent);
+      }
+
+      .summary-note {
+        color: var(--muted);
+        font-size: 13px;
+        margin: 14px 0 0;
+      }
+
+      @media (max-width: 840px) {
+        .workspace {
+          grid-template-columns: 1fr;
+        }
+
+        .moment {
+          grid-template-columns: 1fr;
+        }
+
+        .fields-row {
+          grid-template-columns: 1fr;
+        }
+
+        .frame {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Contextual b-roll moments</h1>
+      <p class="lede">Review the visual moments we suggest for the conversation &mdash; b-roll, callouts, and title cards &mdash; and approve the ones that fit. A long episode stays calm by default: you decide what gets added, and nothing covers a speaker or repeats without a heads-up.</p>
+
+      <section class="workspace" aria-label="Contextual b-roll workspace">
+        <div class="panel">
+          <h2>Suggested moments</h2>
+          <div class="moments" id="moments"></div>
+          <div class="actions">
+            <button type="button" id="addMoment">Add a moment</button>
+            <button type="button" class="secondary" id="reset">Reset sample</button>
+          </div>
+        </div>
+
+        <aside class="panel" aria-live="polite" aria-label="Visual review summary">
+          <h2>Visual review summary</h2>
+          <div id="status" class="status ready">Visuals reviewed</div>
+          <div id="issues" class="issues"></div>
+          <p class="summary-note">Only approved moments appear in the export. Rejected suggestions stay out and won't be offered again this episode.</p>
+        </aside>
+      </section>
+    </main>
+
+    <script>
+      // The kinds of visual treatment a moment can use.
+      const types = {
+        broll: "B-roll clip",
+        title: "Title card",
+        quote: "Quote emphasis",
+        web: "Website / social preview",
+        product: "Product screenshot",
+        sponsor: "Sponsor-safe callout",
+        background: "Subtle background shift",
+      };
+
+      // How strong the visual is. "prominent" is the one most likely to cover a speaker.
+      const strengths = {
+        subtle: "Subtle",
+        standard: "Standard",
+        prominent: "Prominent",
+      };
+
+      // Where the suggestion came from. "weak" sources are low-confidence context that
+      // the spec says to confirm before it appears on screen.
+      const sources = {
+        manual: { label: "I added this", weak: false },
+        transcript: { label: "From a transcript topic", weak: false },
+        social: { label: "From approved social context", weak: false },
+        reference: { label: "From a low-confidence reference", weak: true },
+      };
+
+      // The creator's decision on a suggested moment.
+      const decisions = {
+        suggested: "Keep as suggested",
+        approved: "Approve",
+        adjusted: "Approve, adjusted",
+        rejected: "Reject",
+      };
+
+      const sampleMoments = [
+        { id: "m1", reason: "Guest mentions the product launch", type: "product", strength: "standard", source: "transcript", decision: "approved" },
+        { id: "m2", reason: "Host introduces a new segment", type: "title", strength: "standard", source: "transcript", decision: "suggested" },
+        { id: "m3", reason: "Guest names their company", type: "web", strength: "prominent", source: "reference", decision: "suggested" },
+        { id: "m4", reason: "Quotable line from the host", type: "quote", strength: "subtle", source: "manual", decision: "approved" },
+      ];
+
+      let moments = structuredClone(sampleMoments);
+
+      const momentsElement = document.querySelector("#moments");
+      const statusElement = document.querySelector("#status");
+      const issuesElement = document.querySelector("#issues");
+
+      document.querySelector("#addMoment").addEventListener("click", () => {
+        const next = moments.length + 1;
+        moments.push({ id: `m${next}-${moments.length}`, reason: "New visual moment", type: "broll", strength: "standard", source: "manual", decision: "suggested" });
+        render();
+      });
+
+      document.querySelector("#reset").addEventListener("click", () => {
+        moments = structuredClone(sampleMoments);
+        render();
+      });
+
+      const isLive = (decision) => decision === "approved" || decision === "adjusted";
+
+      // Single source of truth: map each moment's decision + source, plus the restraint
+      // rule about back-to-back repeats, into one review state and a creator-facing issue.
+      function evaluate(list) {
+        // A visual that repeats the same treatment immediately after another live one
+        // breaks the "don't make a long episode visually noisy" rule, so the second
+        // one asks for a second look.
+        const repeats = list.map((moment, index) => {
+          if (!isLive(moment.decision) || index === 0) {
+            return false;
+          }
+          const prev = list[index - 1];
+          return isLive(prev.decision) && prev.type === moment.type;
+        });
+
+        const results = list.map((moment, index) => {
+          const source = sources[moment.source] || sources.manual;
+          let state;
+          let issue = null;
+
+          if (moment.decision === "rejected") {
+            state = "rejected";
+            issue = {
+              title: `${moment.reason || "Moment"} won't appear`,
+              action: "Rejected — it stays out of the export and won't be suggested again this episode.",
+              tone: "info",
+            };
+          } else if (repeats[index]) {
+            state = "review";
+            issue = {
+              title: "Two of the same visual back to back",
+              action: `${types[moment.type]} repeats right after the previous moment. Space them out or change one so the episode doesn't feel busy.`,
+              tone: "review",
+            };
+          } else if (moment.decision === "suggested" && source.weak) {
+            state = "review";
+            issue = {
+              title: `Check the context for "${moment.reason}"`,
+              action: "This came from low-confidence context. Confirm it fits before it appears on screen, or reject it.",
+              tone: "review",
+            };
+          } else if (moment.decision === "adjusted") {
+            state = "approved";
+            issue = {
+              title: `${moment.reason}: adjusted and approved`,
+              action: "Your changed treatment is in the export.",
+              tone: "info",
+            };
+          } else if (moment.decision === "approved") {
+            state = "approved";
+          } else {
+            state = "suggested";
+            issue = {
+              title: `Approve "${moment.reason}"?`,
+              action: "Approve it to include the visual, adjust its treatment, or reject it.",
+              tone: "info",
+            };
+          }
+
+          return { id: moment.id, state, issue };
+        });
+
+        const hasReview = results.some((result) => result.state === "review" || result.state === "suggested");
+        const overall = hasReview ? "review" : "ready";
+        return { overall, results };
+      }
+
+      function render() {
+        const evaluation = evaluate(moments);
+        momentsElement.replaceChildren(
+          ...moments.map((moment, index) => renderMoment(moment, index, evaluation.results[index])),
+        );
+
+        statusElement.className = `status ${evaluation.overall}`;
+        statusElement.textContent = evaluation.overall === "ready" ? "Visuals reviewed" : "Moments need review";
+
+        const issues = evaluation.results.map((result) => result.issue).filter(Boolean);
+        issuesElement.replaceChildren(
+          ...(issues.length
+            ? issues.map(renderIssue)
+            : [Object.assign(document.createElement("p"), { textContent: "Every suggested moment is settled. Approved visuals are ready for export." })]),
+        );
+      }
+
+      function badgeClass(state) {
+        if (state === "approved") {
+          return "approved";
+        }
+        if (state === "rejected") {
+          return "rejected";
+        }
+        if (state === "review") {
+          return "review";
+        }
+        return "suggested";
+      }
+
+      function badgeLabel(state) {
+        return state === "review" ? "needs review" : state;
+      }
+
+      function renderMoment(moment, index, result) {
+        const article = document.createElement("article");
+        article.className = "moment";
+
+        const frameClass = moment.decision === "rejected" ? "rejected" : moment.strength;
+        const typeOptions = Object.entries(types)
+          .map(([value, label]) => `<option value="${value}" ${value === moment.type ? "selected" : ""}>${label}</option>`)
+          .join("");
+        const strengthOptions = Object.entries(strengths)
+          .map(([value, label]) => `<option value="${value}" ${value === moment.strength ? "selected" : ""}>${label}</option>`)
+          .join("");
+        const sourceOptions = Object.entries(sources)
+          .map(([value, item]) => `<option value="${value}" ${value === moment.source ? "selected" : ""}>${item.label}</option>`)
+          .join("");
+        const decisionOptions = Object.entries(decisions)
+          .map(([value, label]) => `<option value="${value}" ${value === moment.decision ? "selected" : ""}>${label}</option>`)
+          .join("");
+
+        // The scaffold holds only controlled values (type/strength/source/decision keys
+        // and their fixed labels, fixed states). The editable reason is written via .value
+        // below, so typed text can never inject markup into the page.
+        article.innerHTML = `
+          <div class="frame ${frameClass}">
+            <span class="speaker"></span>
+            <span class="overlay"></span>
+            <span class="tag">${strengths[moment.strength]}</span>
+          </div>
+          <div class="fields">
+            <div class="head">
+              <strong>Why suggested</strong>
+              <span class="badge ${badgeClass(result.state)}">${badgeLabel(result.state)}</span>
+            </div>
+            <label>Moment<input data-field="reason" aria-label="Why this moment was suggested"></label>
+            <div class="fields-row">
+              <label>Visual type
+                <select data-field="type" aria-label="Visual treatment">${typeOptions}</select>
+              </label>
+              <label>Strength
+                <select data-field="strength" aria-label="Visual strength">${strengthOptions}</select>
+              </label>
+            </div>
+            <div class="fields-row">
+              <label>Suggested from
+                <select data-field="source" aria-label="Where the suggestion came from">${sourceOptions}</select>
+              </label>
+              <label>Decision
+                <select data-field="decision" aria-label="Approve, adjust, keep, or reject">${decisionOptions}</select>
+              </label>
+            </div>
+          </div>
+        `;
+
+        article.querySelector('[data-field="reason"]').value = moment.reason;
+
+        article.addEventListener("input", (event) => updateMoment(event, index));
+        article.addEventListener("change", (event) => updateMoment(event, index));
+        return article;
+      }
+
+      function updateMoment(event, index) {
+        const field = event.target.dataset.field;
+        if (!field) {
+          return;
+        }
+        moments[index][field] = event.target.value;
+        render();
+      }
+
+      function renderIssue(issue) {
+        const article = document.createElement("article");
+        article.className = `issue ${issue.tone}`;
+        // issue.title and issue.action embed the editable reason text, so build them
+        // with textContent rather than innerHTML.
+        const strong = document.createElement("strong");
+        strong.textContent = issue.title;
+        const span = document.createElement("span");
+        span.textContent = issue.action;
+        article.append(strong, span);
+        return article;
+      }
+
+      render();
+    </script>
+  </body>
+</html>
