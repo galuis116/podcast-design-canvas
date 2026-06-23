@@ -41,6 +41,32 @@ Use simple states:
 
 These states should appear in caption review and long-form navigation only when they affect visible captions, search results, or publish readiness.
 
+## Bulk Re-Attribution
+
+Sometimes a single fix is not enough: one speaker was mislabeled across the whole episode, two labels turn out to be the same person, or one label quietly captured two people. Give the creator episode-wide actions instead of forcing line-by-line repair:
+
+- reassign every line of one speaker to a different speaker in one action
+- merge two labels that are the same person into a single speaker
+- split one label into two when it captured two different people
+- preview how many caption lines and transcript moments each action will change before it is applied
+- undo a bulk action as a single step, not line by line
+
+A split should hand the creator a quick way to separate the captured lines between the two people, usually by exchange or by section, rather than leaving every line ambiguous. A merge should keep the clearer of the two names and carry both sets of lines forward.
+
+Each bulk action should report one outcome state, and only one at a time:
+
+- not started
+- previewing changes
+- applied
+- reverted
+
+Independent of that state, a bulk action may also surface either flag when it applies:
+
+- leaves some lines still unassigned
+- conflicts with the confirmed roles, which the creator resolves where the speakers are defined
+
+Bulk re-attribution changes who is named in captions and search, not who the speakers are at the role level. When a fix really means a track was mapped to the wrong person, point the creator back to where roles are confirmed rather than rewriting every label here.
+
 ## Flow Connections
 
 Attribution review starts from the speaker buckets and roles confirmed in `docs/episode-ingest-readiness.md` and `docs/speaker-role-mapping.md`. If the wrong speaker appears because the tracks drifted, hand the moment to `docs/speaker-sync-repair.md` instead of asking the creator to relabel every caption.
