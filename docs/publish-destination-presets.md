@@ -61,6 +61,22 @@ Choosing a destination should stay a publishing decision, not an encoder configu
 
 Destination changes should describe the publishing consequence, not raw setting names.
 
+## Multiple Destinations
+
+When the same episode is prepared for more than one destination, each destination should keep the publishing outcomes its own preset describes rather than collapsing everything into one shared set of settings. A full episode and a sponsor approval copy of the same recording should not have to agree on caption behavior, watermark, or file naming.
+
+To keep this unambiguous, the creator should pick exactly one primary destination per episode:
+
+- the primary destination is a single choice and cannot be two destinations at once
+- the primary destination is what the show's saved default applies to and what the main readiness summary speaks about first
+- every other prepared destination is an additional destination, and any number of these can be turned on alongside the primary
+
+Additional destinations should be independent of each other. Turning on a sponsor approval copy should never force an archive master on or off, and removing one additional destination should leave the rest untouched.
+
+When two prepared destinations would set the same setting differently, that is not a conflict to resolve into one winner. Each destination should produce its own package using its own preset, so the creator sees per-destination outcomes such as "the full episode ships with chapter metadata; the archive copy ships without it" instead of a single reconciled value. Where a setting genuinely must be shared, such as a correction made to the underlying recording, the change should flow to every prepared destination and the consequence should be described for each one.
+
+A single override should stay scoped to the destination it was made on. Overriding caption behavior on the sponsor approval copy should not quietly change the full episode, and the creator should be able to see which destination an override belongs to.
+
 ## Review States
 
 Before export, show what differs from the recommended preset:
