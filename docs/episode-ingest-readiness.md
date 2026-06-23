@@ -68,10 +68,10 @@ Each readiness check maps to the spec that owns the fix:
 
 | Readiness issue | Where the creator fixes it | Relevant section |
 | --- | --- | --- |
-| empty speaker bucket | `docs/source-media-health.md` | Health Checks, Readiness Summary |
-| two buckets share the same recording | `docs/speaker-sync-repair.md` | Detected Issues, Repair Actions |
-| track has audio but no video | `docs/source-media-health.md` | Health Checks, Readiness Summary |
-| duration mismatch across speaker files | `docs/speaker-sync-repair.md` | Detected Issues, Repair Actions |
+| empty speaker bucket | `docs/source-media-health.md` | Health Checks, Review States |
+| two buckets share the same recording | `docs/speaker-sync-repair.md` | Detected Issues, Creator Controls |
+| track has audio but no video | `docs/source-media-health.md` | Health Checks, Review States |
+| duration mismatch across speaker files | `docs/speaker-sync-repair.md` | Detected Issues, Creator Controls |
 | transcript not started or failed | `docs/source-media-health.md` | Health Checks |
 | speaker bucket still needs a name or link | `docs/social-context-intake.md` | Accepted Inputs, Review States |
 
