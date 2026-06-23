@@ -103,6 +103,20 @@ Offer simple actions:
 
 Avoid making brand setup mandatory before preview or forcing one house style across every podcast.
 
+## Brand Version Freshness
+
+When a creator updates the brand kit, episodes already in progress should make it easy to see whether they reflect the latest brand choices or an earlier version—without nagging or forcing a refresh.
+
+Each in-progress episode should carry exactly one freshness status:
+
+- on current brand — the episode already reflects the latest brand inputs; show no marker when everything is up to date
+- older brand version — the episode was last branded before a kit change; surface a quiet inline marker on the affected preview surfaces, not a blocking banner
+- refreshed — the creator pulled the latest brand inputs into this episode; clear the marker and update previews for the affected surfaces
+
+The marker should be informational, never a hard stop. A creator should be able to keep previewing and editing an episode on an older brand version, and choose to refresh per surface or for the whole episode in one action. Refreshing should respect already-accepted readability choices rather than silently reintroducing a fix the creator declined.
+
+Freshness is independent of conflict status: an episode can be on current brand and still have an accepted-with-note choice, or be on an older version with no conflicts at all. When both apply, show the conflict note and the freshness marker side by side rather than letting one hide the other. Already-exported episodes are never marked older; refreshing applies only to episodes still in progress.
+
 ## Reuse
 
 A brand kit should attach to a show template but remain editable. Teams should be able to update future episodes without changing already exported episodes.
