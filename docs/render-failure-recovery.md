@@ -33,6 +33,26 @@ Offer direct actions:
 
 Each action should explain the effect on the final episode.
 
+## Recovery Status
+
+A creator who hits a failed render should always know where recovery stands, without watching a progress log. Each failed render should carry a clear status:
+
+- failed — the render stopped and needs a decision before retrying
+- retrying — the creator chose an action and the export is running again
+- recovered — a retry or fix produced a usable preview or export
+- needs creator input — recovery is blocked until the creator replaces an asset or fixes a readiness issue
+- exported around the issue — the creator finished by skipping an optional visual or captions
+- set aside — the creator stepped away but kept edits without finishing this export
+
+Keep the status tied to the chosen recovery action rather than infrastructure progress:
+
+- moving from failed to retrying should restate the effect described in Recovery Actions above
+- needs creator input should point at the specific missing asset or the relevant warning in `docs/export-readiness-review.md`, not a generic error
+- recovered should show the last successful preview or export so the creator can confirm the fix
+- set aside should rely on Preservation Rules below so no edits are lost while the export stays unfinished
+
+A status should describe recovery progress only; it should never block the creator from returning to the issue moment or creating a review copy instead, and it should not restate the readiness checks owned by `docs/export-readiness-review.md`.
+
 ## Preservation Rules
 
 Failures should not erase:
