@@ -53,6 +53,23 @@ Defining and applying segments should stay a creator-facing arranging step, not 
 
 A segment change should adapt the episode's structure around it rather than forcing every show into the same fixed format.
 
+## Review States
+
+While arranging segments, each segment is either resolved or still needs a decision, so the creator can keep the "needs attention" list focused on segments that are genuinely undecided.
+
+Resolved — no action needed:
+
+- ready — placed, bounded, and named; contributes to the episode
+- skipped — intentionally left out of this episode but kept in the template
+
+Unresolved — needs a creator decision, shown in the order to address first:
+
+- empty — no part of the conversation is mapped to the segment
+- needs boundaries — mapped, but the start or end in the conversation is unclear
+- needs a name — bounded, but still using a default type label instead of a show-specific name
+
+Only the unresolved tier should surface as needing attention in long-form review. These states describe the segment arrangement only; how a segment then shapes chapters, titles, pacing, branding, and metadata stays owned by the specs in Segment Behavior.
+
 ## Reuse
 
 Show templates can remember segment order and visual treatment, while each episode can adjust names, topics, guests, and sponsor details.
