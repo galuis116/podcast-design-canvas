@@ -355,6 +355,29 @@ For hour-plus episodes, the product should make review scalable:
 
 Warnings should describe the viewer-facing problem: "Captions are missing for 00:42:10-00:43:05" is better than "caption segment generation failed."
 
+## Warning Acknowledgment
+
+When a creator decides a non-blocking warning is acceptable for this episode, readiness should let them keep it on purpose and remember that choice, rather than forcing the same warning to be re-dismissed at every pass.
+
+Each individual warning carries one acknowledgment status, and only one at a time:
+
+- active — the warning is open and still counts toward the readiness summary
+- acknowledged — the creator has intentionally kept the warning for this export, with the publishing consequence shown and recorded
+- resolved — the underlying problem was fixed, so the warning no longer applies
+
+Acknowledging is a positive, deliberate choice the creator makes to ship something as-is. When a creator acknowledges a warning, capture a short plain-language reason if they offer one, record the consequence that ships with the export, and let them undo it back to active at any time.
+
+Alongside this status, a warning can carry an independent remembered flag that controls whether the acknowledgment should carry forward:
+
+- when remembered is on, an acknowledged warning stays acknowledged if the same issue reappears on a later export, so the creator is not asked again
+- when remembered is off, the warning returns to active on the next export and asks for a fresh decision
+
+The flag only applies to the acknowledged status. An active warning has nothing to remember, and a resolved warning is gone unless the underlying problem comes back, in which case it reopens as active regardless of the flag.
+
+Acknowledgment should stay quiet once made. An acknowledged warning leaves a small inline marker on its affected moment and a single line in its readiness group noting it was kept on purpose; it should not raise a banner or re-block export. When every warning in a group is resolved or acknowledged, that group reads as all-clear with no marker at all.
+
+Each acknowledged warning should remain visible in the readiness summary and travel with the export record, so anyone reviewing the finished episode can see what was kept on purpose and why.
+
 ## Review States
 
 The product should use overall readiness status to drive export and checklist behavior:
