@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Transcript Glossary Prototype</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #16211f;
+        --muted: #5e6b67;
+        --line: #d9e0dd;
+        --panel: #f7faf8;
+        --accent: #136f63;
+        --warn: #a15c00;
+        --block: #a52828;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        background: #ffffff;
+      }
+
+      main {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 32px 20px 48px;
+      }
+
+      h1,
+      h2,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        font-size: 32px;
+        line-height: 1.1;
+        margin-bottom: 8px;
+      }
+
+      .lede {
+        color: var(--muted);
+        max-width: 760px;
+      }
+
+      .workspace {
+        display: grid;
+        grid-template-columns: minmax(0, 1.5fr) minmax(320px, 0.85fr);
+        gap: 24px;
+        margin-top: 28px;
+      }
+
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+        padding: 18px;
+      }
+
+      .entries {
+        display: grid;
+        gap: 14px;
+      }
+
+      .entry {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 14px;
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #ffffff;
+      }
+
+      .fields {
+        display: grid;
+        gap: 10px;
+        align-content: start;
+      }
+
+      .fields-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      label {
+        display: grid;
+        gap: 6px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      input,
+      select {
+        width: 100%;
+        min-height: 40px;
+        border: 1px solid #bfcbc7;
+        border-radius: 6px;
+        background: #ffffff;
+        color: var(--ink);
+        font: inherit;
+        padding: 8px 10px;
+      }
+
+      select:disabled {
+        background: #eef2f0;
+        color: #8a948f;
+      }
+
+      .head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .head strong {
+        font-size: 15px;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        border-radius: 999px;
+        padding: 0 11px;
+        font-weight: 700;
+        font-size: 13px;
+        white-space: nowrap;
+      }
+
+      .badge.approved {
+        color: #075246;
+        background: #dff5ef;
+      }
+
+      .badge.suggested {
+        color: #2a4c8a;
+        background: #e2ebfb;
+      }
+
+      .badge.review {
+        color: #7a4400;
+        background: #fff1d6;
+      }
+
+      .badge.declined {
+        color: #5e6b67;
+        background: #eceeed;
+      }
+
+      .status {
+        display: inline-flex;
+        align-items: center;
+        min-height: 32px;
+        border-radius: 999px;
+        padding: 0 12px;
+        font-weight: 800;
+      }
+
+      .status.ready {
+        color: #075246;
+        background: #dff5ef;
+      }
+
+      .status.review {
+        color: #7a4400;
+        background: #fff1d6;
+      }
+
+      .status.blocked {
+        color: #8b1e1e;
+        background: #ffe0e0;
+      }
+
+      .caption {
+        position: relative;
+        width: 116px;
+        min-height: 64px;
+        flex: none;
+        align-self: start;
+        border-radius: 6px;
+        overflow: hidden;
+        background: linear-gradient(160deg, #46665f, #1d2b28);
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        padding: 8px 6px;
+      }
+
+      .caption span {
+        display: inline-block;
+        max-width: 100%;
+        border-radius: 4px;
+        background: rgba(16, 24, 22, 0.78);
+        color: #ffffff;
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 1.25;
+        padding: 3px 6px;
+        text-align: center;
+        word-break: break-word;
+      }
+
+      .caption.declined {
+        filter: grayscale(0.6) brightness(0.85);
+      }
+
+      .issues {
+        display: grid;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .issue {
+        border-left: 4px solid var(--warn);
+        border-radius: 6px;
+        background: #ffffff;
+        padding: 12px;
+      }
+
+      .issue.blocker {
+        border-left-color: var(--block);
+      }
+
+      .issue.info {
+        border-left-color: var(--accent);
+      }
+
+      .issue strong {
+        display: block;
+        margin-bottom: 4px;
+      }
+
+      .issue span {
+        color: var(--muted);
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      button {
+        min-height: 40px;
+        border: 1px solid #0f5d53;
+        border-radius: 6px;
+        background: var(--accent);
+        color: #ffffff;
+        font: inherit;
+        font-weight: 700;
+        padding: 8px 12px;
+        cursor: pointer;
+      }
+
+      button.secondary {
+        background: #ffffff;
+        color: var(--accent);
+      }
+
+      .summary-note {
+        color: var(--muted);
+        font-size: 13px;
+        margin: 14px 0 0;
+      }
+
+      @media (max-width: 840px) {
+        .workspace {
+          grid-template-columns: 1fr;
+        }
+
+        .entry {
+          grid-template-columns: 1fr;
+        }
+
+        .fields-row {
+          grid-template-columns: 1fr;
+        }
+
+        .caption {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Transcript glossary</h1>
+      <p class="lede">Approve the spelling of recurring names, brands, and show terms once, and let those corrections improve captions, titles, and chapters across every episode. Nothing is applied until you confirm it, and you can always decline a suggestion.</p>
+
+      <section class="workspace" aria-label="Transcript glossary workspace">
+        <div class="panel">
+          <h2>Glossary entries</h2>
+          <div class="entries" id="entries"></div>
+          <div class="actions">
+            <button type="button" id="addEntry">Add an entry</button>
+            <button type="button" class="secondary" id="reset">Reset sample</button>
+          </div>
+        </div>
+
+        <aside class="panel" aria-live="polite" aria-label="Glossary summary">
+          <h2>Glossary summary</h2>
+          <div id="status" class="status ready">Glossary ready</div>
+          <div id="issues" class="issues"></div>
+          <p class="summary-note">Approved spellings apply across repeated mentions. Declined suggestions stay out of the way and won't be offered again.</p>
+        </aside>
+      </section>
+    </main>
+
+    <script>
+      // Where a glossary suggestion came from. "manual" and confirmed sources are
+      // trusted; "weak" sources are low-confidence and ask for a second look.
+      const sources = {
+        manual: { label: "I added this myself", weak: false },
+        social: { label: "From social context", weak: false },
+        repeated: { label: "From repeated transcript fixes", weak: true },
+        template: { label: "From a show template", weak: false },
+        "sponsor-kit": { label: "From a sponsor kit", weak: false },
+        heard: { label: "Heard in the audio", weak: true },
+      };
+
+      // Which on-screen surfaces an approved spelling should correct.
+      const scopes = {
+        everywhere: "Captions, titles & descriptions",
+        captions: "Captions only",
+        titles: "Titles & chapters",
+        descriptions: "Descriptions only",
+      };
+
+      // The creator's decision on a glossary entry.
+      const decisions = {
+        suggested: "Keep as suggested",
+        approved: "Approve spelling",
+        declined: "Decline",
+      };
+
+      const sampleEntries = [
+        { id: "e1", term: "Anika", spelling: "Aanika", scope: "everywhere", source: "social", decision: "approved" },
+        { id: "e2", term: "Riverside", spelling: "Riverside.fm", scope: "descriptions", source: "sponsor-kit", decision: "suggested" },
+        { id: "e3", term: "kubernetes", spelling: "Kubernetes", scope: "captions", source: "repeated", decision: "suggested" },
+        { id: "e4", term: "Anika", spelling: "Annika", scope: "captions", source: "heard", decision: "suggested" },
+      ];
+
+      let entries = structuredClone(sampleEntries);
+
+      const entriesElement = document.querySelector("#entries");
+      const statusElement = document.querySelector("#status");
+      const issuesElement = document.querySelector("#issues");
+
+      document.querySelector("#addEntry").addEventListener("click", () => {
+        const next = entries.length + 1;
+        entries.push({ id: `e${next}-${entries.length}`, term: "", spelling: "", scope: "everywhere", source: "manual", decision: "suggested" });
+        render();
+      });
+
+      document.querySelector("#reset").addEventListener("click", () => {
+        entries = structuredClone(sampleEntries);
+        render();
+      });
+
+      const normalize = (value) => value.trim().toLowerCase();
+
+      // Single source of truth: map each entry's term + spelling + decision (plus any
+      // conflict with another entry for the same term) to a review state and an issue.
+      function evaluate(list) {
+        // Group non-declined entries by term so two different approved spellings of the
+        // same word surface as a conflict instead of silently fighting in captions.
+        const byTerm = {};
+        for (const entry of list) {
+          if (entry.decision === "declined") {
+            continue;
+          }
+          const key = normalize(entry.term);
+          if (!key) {
+            continue;
+          }
+          (byTerm[key] = byTerm[key] || new Set()).add(normalize(entry.spelling));
+        }
+
+        const results = list.map((entry) => {
+          const source = sources[entry.source] || sources.manual;
+          const key = normalize(entry.term);
+          const conflict = entry.decision !== "declined" && key && byTerm[key] && byTerm[key].size > 1;
+          let state;
+          let issue = null;
+
+          if (entry.decision === "declined") {
+            state = "declined";
+            issue = {
+              title: `${entry.term || "Entry"} won't be applied`,
+              action: "Declined — this spelling stays out of captions and won't be suggested again.",
+              tone: "info",
+            };
+          } else if (!entry.term.trim() || !entry.spelling.trim()) {
+            state = "review";
+            issue = {
+              title: "An entry is missing its term or spelling",
+              action: "Add both the spoken term and the approved spelling so we know what to correct.",
+              tone: "review",
+            };
+          } else if (conflict) {
+            state = "review";
+            issue = {
+              title: `Two spellings for "${entry.term}"`,
+              action: "Captions can only use one. Approve the correct spelling and decline the other.",
+              tone: "review",
+            };
+          } else if (entry.decision === "approved") {
+            state = "approved";
+          } else if (source.weak) {
+            state = "review";
+            issue = {
+              title: `Check the spelling of "${entry.term}"`,
+              action: `We picked this up ${source.label.toLowerCase()}, so confirm "${entry.spelling}" before it spreads across the episode.`,
+              tone: "review",
+            };
+          } else {
+            state = "suggested";
+            issue = {
+              title: `Approve "${entry.spelling}" for "${entry.term}"`,
+              action: "Approve it to fix every mention, or change the spelling.",
+              tone: "info",
+            };
+          }
+
+          return { id: entry.id, state, issue, conflict: Boolean(conflict) };
+        });
+
+        const hasConflict = results.some((result) => result.conflict);
+        const hasReview = results.some((result) => result.state === "review" || result.state === "suggested");
+        const overall = hasConflict ? "blocked" : hasReview ? "review" : "ready";
+        return { overall, results };
+      }
+
+      function render() {
+        const evaluation = evaluate(entries);
+        entriesElement.replaceChildren(
+          ...entries.map((entry, index) => renderEntry(entry, index, evaluation.results[index])),
+        );
+
+        statusElement.className = `status ${evaluation.overall}`;
+        statusElement.textContent = evaluation.overall === "ready"
+          ? "Glossary ready"
+          : evaluation.overall === "blocked"
+            ? "Resolve spelling conflicts"
+            : "Review suggested spellings";
+
+        const issues = evaluation.results.map((result) => result.issue).filter(Boolean);
+        issuesElement.replaceChildren(
+          ...(issues.length
+            ? issues.map(renderIssue)
+            : [Object.assign(document.createElement("p"), { textContent: "Every entry is settled. These spellings will apply across the episode." })]),
+        );
+      }
+
+      function badgeClass(state) {
+        if (state === "approved") {
+          return "approved";
+        }
+        if (state === "declined") {
+          return "declined";
+        }
+        if (state === "review") {
+          return "review";
+        }
+        return "suggested";
+      }
+
+      function badgeLabel(state) {
+        return state === "review" ? "needs review" : state;
+      }
+
+      function renderEntry(entry, index, result) {
+        const article = document.createElement("article");
+        article.className = "entry";
+
+        const scopeOptions = Object.entries(scopes)
+          .map(([value, label]) => `<option value="${value}" ${value === entry.scope ? "selected" : ""}>${label}</option>`)
+          .join("");
+        const sourceOptions = Object.entries(sources)
+          .map(([value, item]) => `<option value="${value}" ${value === entry.source ? "selected" : ""}>${item.label}</option>`)
+          .join("");
+        const decisionOptions = Object.entries(decisions)
+          .map(([value, label]) => `<option value="${value}" ${value === entry.decision ? "selected" : ""}>${label}</option>`)
+          .join("");
+
+        // The scaffold holds only controlled values (scope/source/decision keys and
+        // their fixed labels, fixed states). The editable term and spelling are written
+        // via .value and the caption preview via textContent below, so typed text can
+        // never inject markup into the page.
+        article.innerHTML = `
+          <div class="caption ${entry.decision === "declined" ? "declined" : ""}">
+            <span data-preview></span>
+          </div>
+          <div class="fields">
+            <div class="head">
+              <strong>Glossary entry</strong>
+              <span class="badge ${badgeClass(result.state)}">${badgeLabel(result.state)}</span>
+            </div>
+            <div class="fields-row">
+              <label>Spoken term<input data-field="term" aria-label="Spoken term"></label>
+              <label>Approved spelling<input data-field="spelling" aria-label="Approved spelling"></label>
+            </div>
+            <div class="fields-row">
+              <label>Applies to
+                <select data-field="scope" aria-label="Where the spelling applies">${scopeOptions}</select>
+              </label>
+              <label>Suggested from
+                <select data-field="source" aria-label="Where the entry came from">${sourceOptions}</select>
+              </label>
+            </div>
+            <label>Decision
+              <select data-field="decision" aria-label="Approve, keep as suggested, or decline">${decisionOptions}</select>
+            </label>
+          </div>
+        `;
+
+        article.querySelector('[data-field="term"]').value = entry.term;
+        article.querySelector('[data-field="spelling"]').value = entry.spelling;
+        article.querySelector("[data-preview]").textContent = entry.spelling.trim() || "Aa";
+
+        article.addEventListener("input", (event) => updateEntry(event, index));
+        article.addEventListener("change", (event) => updateEntry(event, index));
+        return article;
+      }
+
+      function updateEntry(event, index) {
+        const field = event.target.dataset.field;
+        if (!field) {
+          return;
+        }
+        const entry = entries[index];
+        entry[field] = event.target.value;
+
+        // Editing the term or spelling makes an earlier approval stale: drop back to
+        // "suggested" so the creator re-approves the changed spelling (unless they had
+        // already declined the entry, which stays declined).
+        if ((field === "term" || field === "spelling") && entry.decision === "approved") {
+          entry.decision = "suggested";
+        }
+        render();
+      }
+
+      function renderIssue(issue) {
+        const article = document.createElement("article");
+        article.className = `issue ${issue.tone}`;
+        // issue.title and issue.action embed the editable term/spelling, so build them
+        // with textContent rather than innerHTML.
+        const strong = document.createElement("strong");
+        strong.textContent = issue.title;
+        const span = document.createElement("span");
+        span.textContent = issue.action;
+        article.append(strong, span);
+        return article;
+      }
+
+      render();
+    </script>
+  </body>
+</html>
