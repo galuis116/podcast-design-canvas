@@ -79,6 +79,22 @@ Before applying an asset, flag:
 - wrong speaker association
 - asset already rejected for this episode
 
+## Asset Status
+
+Every asset should carry one lifecycle status at a time, and the product should keep that status separate from approval and review flags so creators never confuse where an asset is in its life with whether it is cleared for a role. A single asset should be in exactly one of:
+
+- suggested — pulled in automatically or proposed for the creator, not yet placed in any episode, template, or kit
+- in use — currently placed in at least one current episode, template, speaker profile, or sponsor kit
+- archived — retired by the creator from future suggestions and new placements
+
+These three states should be mutually exclusive: an asset that becomes placed should move out of suggested, and archiving should override suggested or in use. Status should describe placement and availability only; it should never stand in for whether an asset is approved, rejected, or flagged for review, since those decisions can apply at any status.
+
+The product should also make clear what each status means for already-finished work:
+
+- archiving an asset should keep it out of new suggestions and new placements while leaving every already-exported episode untouched
+- an archived asset should still be findable when a creator opens an episode or template that already relies on it, so retired material is never silently lost
+- moving an asset back from archived to suggested or in use should be a deliberate creator action, not an automatic side effect of search or filtering
+
 ## Maintainer Acceptance Notes
 
 Accept work that helps creators reuse approved podcast assets across episodes, templates, and clients. Close work that becomes a generic file browser, ignores usage context, or hides where assets are used in final exports.
