@@ -70,6 +70,19 @@ Unresolved — needs a creator decision, shown in the order to address first:
 
 Only the unresolved tier should surface as needing attention in long-form review. These states describe the segment arrangement only; how a segment then shapes chapters, titles, pacing, branding, and metadata stays owned by the specs in Segment Behavior.
 
+## Overlap and Gaps
+
+Because segments are bounded against the conversation and can be reordered, two segments can end up claiming the same stretch of audio, or a stretch can fall between them with no segment assigned. The product should resolve these between-segment situations without making the creator edit raw timeline markers.
+
+When boundaries collide, the product should:
+
+- flag any stretch claimed by more than one segment as an overlap, and show which segments contend for it
+- offer to trim the earlier segment's end to the later segment's start, or the later segment's start to the earlier segment's end, as a one-tap fix
+- keep the contended stretch assigned to whichever segment the creator confirms, and never split a single moment across two segments silently
+- treat a stretch with no segment as an unassigned gap, and let the creator extend a neighboring segment to cover it, drop in a new segment, or intentionally leave it as filler
+
+A stretch is covered exactly when it belongs to a single segment; overlap and unassigned gap are surfaced as separate, fixable conditions rather than blended into one warning, and they show as a quiet marker on the stretch rather than a blocking banner. Whether a covered stretch is otherwise ready, skipped, or still undecided stays with the segment-by-segment arrangement status, and how the resulting structure shapes titles, pacing, branding, and metadata stays with the segment behavior specs.
+
 ## Reuse
 
 Show templates can remember segment order and visual treatment, while each episode can adjust names, topics, guests, and sponsor details.
