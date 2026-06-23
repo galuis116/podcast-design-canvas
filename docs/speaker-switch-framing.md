@@ -44,6 +44,17 @@ Flag switch framing only when it affects the finished episode:
 
 These states should appear in `docs/long-form-navigation.md` navigation lanes and in `docs/export-readiness-review.md` Speaker Framing Warnings when they would affect export.
 
+## Speaker Count Changes
+
+When the people on screen during an episode don't match the speaker count the saved layout expects, the framing should adapt on its own and show the creator what changed:
+
+- a guest who appears for only one segment gets folded into the active layout while present, then dropped from the frame once they stop speaking
+- a solo intro before a guest arrives frames the lone host full, then opens room for the second speaker at the moment they first speak
+- more speakers than the preset plans for fall back to the nearest layout the preset can hold, with the extra speakers added as smaller presences rather than forcing a re-pick
+- fewer speakers than expected close the empty slots so the remaining speakers fill the frame instead of leaving a gap where someone never arrived
+
+The creator sees a short note on each segment where the live count differed from the layout, so they can confirm the auto-adapted framing or pin a preferred arrangement for that stretch. Adapting to a changed count should reuse the episode's existing reframe styles and speeds rather than inventing a separate look for guest moments.
+
 ## Template Reuse
 
 When saving a show template via `docs/show-template-adaptation.md`, the chosen switch style and speed should carry forward so recurring shows keep a consistent feel across episodes.
