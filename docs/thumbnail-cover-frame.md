@@ -59,6 +59,17 @@ The product should use thumbnail status to drive export and checklist behavior:
 
 Each state should describe what happens at export time, not only the label on the frame.
 
+## Variant Comparison
+
+When several candidates look viable, the product should let creators line them up and pick one cover to publish:
+
+- show the candidate frames together so expressions, text, and crops can be judged side by side
+- let the creator mark exactly one frame as the active cover; choosing a new active cover moves the previous one back to an alternate
+- keep the other viable frames as saved alternates so they stay one tap away without cluttering the choice
+- carry the active cover forward as the frame that publishing and checklist surfaces treat as the episode's thumbnail
+
+Active versus alternate is a single mutually-exclusive choice across the candidate set, separate from each frame's own review flags such as a readability or spoiler warning. A frame can sit as an alternate while still carrying its warnings, and promoting it to active should resurface any unresolved concern before publish.
+
 ## Editing Controls
 
 Keep edits lightweight:
