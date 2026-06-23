@@ -112,6 +112,23 @@ The product should use checklist item status to drive export and handoff behavio
 
 Each state should describe what happens at export time for that item—not only the label on the checklist row.
 
+## Item Freshness
+
+A checklist item that was already satisfied can fall behind the work it summarizes—captions get re-edited, a sponsor disclosure is reopened, source media is re-synced, or an approval note changes—after the creator marked that item ready. Beyond a destination change, the checklist should notice when the underlying review surface has moved on and let the creator re-confirm with confidence, rather than quietly shipping the older state.
+
+Track freshness independently of item status, using one of two mutually-exclusive values:
+
+- current — nothing the item depends on has changed since it was last satisfied
+- stale — a source review the item summarizes changed after the item was marked ready, ignored, or not needed
+
+Freshness combines with status without replacing it:
+
+- only items resolved by the creator (ready, ignored, or not needed) can become stale; needs review and blocked items are already pointing at the fixing surface, so they stay current
+- a stale item keeps its existing status and stays passable at export; freshness never blocks on its own and never re-runs a review the creator already accepted
+- re-confirming a stale item returns it to current without changing its status; opening the linked surface and accepting the new state does the same
+
+Surface freshness as a quiet inline marker on the affected row—a small "updated since you confirmed" note next to the existing status—and show nothing when every confirmed item is current. Do not raise a banner, reset the row to a blocked look, or imply the creator must redo the work; the marker is an invitation to glance, not a stop.
+
 ## Creator Controls
 
 Offer simple actions:
