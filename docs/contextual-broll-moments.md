@@ -86,6 +86,17 @@ The product should use visual moment status to drive contextual review and expor
 
 Each state should describe what happens in preview, export readiness, and template reuse—not only the label on the moment.
 
+## Pacing Across The Episode
+
+A single moment can look right on its own and still feel crowded when it lands seconds after the last one, so the product should give the creator one calm read on how approved moments are spaced across the full episode instead of judging each moment alone:
+
+- comfortably spaced — the default; approved moments have room to breathe, so show nothing extra and keep the timeline clean
+- a little tight here — two or more approved moments sit close enough to feel busy; show a quiet inline marker at the tighter stretch with plain-language context, such as "Three callouts land within a few seconds here"
+
+These two readings are exhaustive and never apply at once: a stretch is either comfortably spaced or a little tight, so the creator sees at most one gentle prompt and only where it helps. The prompt is a suggestion, not a gate—nothing is blocked, and the creator stays free to keep a lively, densely-edited stretch on purpose when the show calls for it.
+
+When the creator opens the tighter stretch, the prompt should point to the moments involved so spacing, trimming, or choosing a calmer treatment is a quick adjustment rather than a hunt. Resolving or accepting the stretch clears its marker without touching how individual moments are otherwise reviewed.
+
 ## Creator Controls
 
 Offer simple actions:
