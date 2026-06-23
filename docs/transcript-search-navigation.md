@@ -67,6 +67,41 @@ From a result, the creator should be able to:
 - send the moment into caption review
 - return to the previous search without losing filters
 
+## Saved Searches
+
+A creator who runs the same kind of search repeatedly should be able to save it instead of retyping the term and rebuilding filters each time.
+
+A saved search should keep:
+
+- a creator-given name
+- the search term or glossary term it was built from
+- the filters that were active when it was saved
+- whether it is pinned to the show or kept on this episode only
+
+Saving a search should not freeze its results. Each saved search re-runs against the current episode's reviewed transcript when the creator opens it, so matches reflect the latest corrections rather than a stale snapshot.
+
+Each saved search should show one freshness status, and that status is always exactly one of:
+
+- never run on this episode — saved on the show but not yet opened against the current transcript
+- up to date — last run after the most recent transcript correction
+- stale — the transcript changed since the last run, so the match count may be out of date
+
+Separately from that status, a saved search can carry independent flags that may appear together:
+
+- pinned to the show — offered automatically on every new episode of the show
+- has new matches — found results not present the last time it was run
+- empty on this episode — produced no matches in the current transcript
+
+Pinning belongs to the show, so a pinned search travels with the show template, while an unpinned search stays scoped to the episode where it was saved.
+
+From the saved search list, the creator should be able to:
+
+- re-run a saved search against the current episode and refresh its match count
+- rename a saved search or adjust its filters and save the change
+- pin a saved search to the show or unpin it back to this episode only
+- open a saved search's results without losing the filters it was saved with
+- remove a saved search the creator no longer needs
+
 ## Maintainer Acceptance Notes
 
 Accept work that makes long-form transcript navigation useful for editing, captions, chapters, and visual moments. Close work that treats search as a generic text box disconnected from the episode preview and speaker context.
