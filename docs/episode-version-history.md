@@ -45,6 +45,27 @@ Version history should stay connected to the creative workflows that produce epi
 
 The product should show creator-meaningful checkpoints from these flows, not raw autosave noise or background processing logs.
 
+## Version Actions
+
+A creator scanning version history should be able to act on a checkpoint without digging through low-level revisions. Each version should carry a clear state:
+
+- current — the edit state the creator is working in
+- labeled — given a plain-language name by the creator
+- pinned — kept easy to find as an important checkpoint
+- protected — a final export or client-approved state that should not be overwritten
+- superseded — an older checkpoint kept for reference
+
+Keep the actions simple:
+
+- label a version in plain language
+- pin an important checkpoint
+- compare two versions side by side
+- restore an earlier version
+- duplicate a version as a safe place to try changes
+- protect a final or approved version from accidental overwrite
+
+Acting on a version should describe the creative effect, not a file operation: "Restore the edit from before the last template change" rather than "revert to an earlier revision." Restoring follows the rules in Restore Behavior below, and protected versions should stay safe even when the creator restores or edits other checkpoints.
+
 ## Restore Behavior
 
 Restoring a version should explain what will change:
