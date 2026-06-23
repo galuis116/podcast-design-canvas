@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Speaker Role Mapping Prototype</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #16211f;
+        --muted: #5e6b67;
+        --line: #d9e0dd;
+        --panel: #f7faf8;
+        --accent: #136f63;
+        --warn: #a15c00;
+        --block: #a52828;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        background: #ffffff;
+      }
+
+      main {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 32px 20px 48px;
+      }
+
+      h1,
+      h2,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        font-size: 32px;
+        line-height: 1.1;
+        margin-bottom: 8px;
+      }
+
+      .lede {
+        color: var(--muted);
+        max-width: 760px;
+      }
+
+      .workspace {
+        display: grid;
+        grid-template-columns: minmax(0, 1.5fr) minmax(320px, 0.85fr);
+        gap: 24px;
+        margin-top: 28px;
+      }
+
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+        padding: 18px;
+      }
+
+      .tracks {
+        display: grid;
+        gap: 14px;
+      }
+
+      .track {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 14px;
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #ffffff;
+      }
+
+      .fields {
+        display: grid;
+        gap: 10px;
+        align-content: start;
+      }
+
+      .fields-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      label {
+        display: grid;
+        gap: 6px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      input,
+      select {
+        width: 100%;
+        min-height: 40px;
+        border: 1px solid #bfcbc7;
+        border-radius: 6px;
+        background: #ffffff;
+        color: var(--ink);
+        font: inherit;
+        padding: 8px 10px;
+      }
+
+      select:disabled {
+        background: #eef2f0;
+        color: #8a948f;
+      }
+
+      .head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .head strong {
+        font-size: 15px;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        border-radius: 999px;
+        padding: 0 11px;
+        font-weight: 700;
+        font-size: 13px;
+        white-space: nowrap;
+        text-transform: capitalize;
+      }
+
+      .badge.confirmed {
+        color: #075246;
+        background: #dff5ef;
+      }
+
+      .badge.suggested {
+        color: #2a4c8a;
+        background: #e2ebfb;
+      }
+
+      .badge.review {
+        color: #7a4400;
+        background: #fff1d6;
+      }
+
+      .badge.unassigned {
+        color: #8b1e1e;
+        background: #ffe0e0;
+      }
+
+      .status {
+        display: inline-flex;
+        align-items: center;
+        min-height: 32px;
+        border-radius: 999px;
+        padding: 0 12px;
+        font-weight: 800;
+      }
+
+      .status.ready {
+        color: #075246;
+        background: #dff5ef;
+      }
+
+      .status.review {
+        color: #7a4400;
+        background: #fff1d6;
+      }
+
+      .status.blocked {
+        color: #8b1e1e;
+        background: #ffe0e0;
+      }
+
+      .avatar {
+        position: relative;
+        width: 84px;
+        aspect-ratio: 1;
+        flex: none;
+        align-self: start;
+      }
+
+      .avatar-inner {
+        position: absolute;
+        inset: 0;
+        border-radius: 8px;
+        overflow: hidden;
+        background: linear-gradient(160deg, #6db5a8, #1d554d);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+      }
+
+      .avatar-inner::before {
+        content: "";
+        position: absolute;
+        top: 16%;
+        left: 50%;
+        width: 38%;
+        aspect-ratio: 1;
+        transform: translateX(-50%);
+        border-radius: 50%;
+        background: #e8f4f1;
+      }
+
+      .avatar-inner::after {
+        content: "";
+        position: absolute;
+        right: 22%;
+        bottom: 0;
+        left: 22%;
+        height: 40%;
+        border-radius: 999px 999px 0 0;
+        background: #d9ece8;
+      }
+
+      .avatar.offcamera .avatar-inner {
+        background: repeating-linear-gradient(135deg, #d7ddda, #d7ddda 8px, #e7ece9 8px, #e7ece9 16px);
+      }
+
+      .avatar.offcamera .avatar-inner::before,
+      .avatar.offcamera .avatar-inner::after {
+        display: none;
+      }
+
+      .tag {
+        position: absolute;
+        left: 4px;
+        right: 4px;
+        bottom: 4px;
+        border-radius: 4px;
+        background: rgba(16, 24, 22, 0.8);
+        color: #ffffff;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 3px 6px;
+        text-align: center;
+      }
+
+      .issues {
+        display: grid;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .issue {
+        border-left: 4px solid var(--warn);
+        border-radius: 6px;
+        background: #ffffff;
+        padding: 12px;
+      }
+
+      .issue.blocker {
+        border-left-color: var(--block);
+      }
+
+      .issue.info {
+        border-left-color: var(--accent);
+      }
+
+      .issue strong {
+        display: block;
+        margin-bottom: 4px;
+      }
+
+      .issue span {
+        color: var(--muted);
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      button {
+        min-height: 40px;
+        border: 1px solid #0f5d53;
+        border-radius: 6px;
+        background: var(--accent);
+        color: #ffffff;
+        font: inherit;
+        font-weight: 700;
+        padding: 8px 12px;
+        cursor: pointer;
+      }
+
+      button.secondary {
+        background: #ffffff;
+        color: var(--accent);
+      }
+
+      .summary-note {
+        color: var(--muted);
+        font-size: 13px;
+        margin: 14px 0 0;
+      }
+
+      @media (max-width: 840px) {
+        .workspace {
+          grid-template-columns: 1fr;
+        }
+
+        .track {
+          grid-template-columns: 1fr;
+        }
+
+        .fields-row {
+          grid-template-columns: 1fr;
+        }
+
+        .avatar {
+          width: 96px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Speaker role mapping</h1>
+      <p class="lede">Give each imported track a clear podcast role before styling, so the product places and labels every speaker correctly. We suggest a role from what we can see, but you stay in control &mdash; nothing is locked in until you confirm it.</p>
+
+      <section class="workspace" aria-label="Speaker role mapping workspace">
+        <div class="panel">
+          <h2>Imported tracks</h2>
+          <div class="tracks" id="tracks"></div>
+          <div class="actions">
+            <button type="button" id="addTrack">Add a track</button>
+            <button type="button" class="secondary" id="reset">Reset sample</button>
+          </div>
+        </div>
+
+        <aside class="panel" aria-live="polite" aria-label="Role mapping summary">
+          <h2>Role summary</h2>
+          <div id="status" class="status ready">Roles confirmed</div>
+          <div id="issues" class="issues"></div>
+          <p class="summary-note">A track is never locked into a role you have not seen. Confirm a suggestion in one step, or change it from the short list of podcast roles.</p>
+        </aside>
+      </section>
+    </main>
+
+    <script>
+      // Podcast roles a track can take. "Single-seat" roles (host, co-host) are
+      // the ones we warn about if two tracks claim them at once.
+      const roles = {
+        "": { label: "Unassigned", single: false },
+        host: { label: "Host", single: true },
+        "co-host": { label: "Co-host", single: true },
+        guest: { label: "Guest", single: false },
+        panelist: { label: "Panelist", single: false },
+        producer: { label: "Producer (off-camera)", single: false, offcamera: true },
+        narrator: { label: "Narrator / voiceover", single: false, offcamera: true },
+      };
+
+      // Where a suggested role came from. "manual" means the creator set it, so it
+      // is never treated as a low-confidence guess that needs a second look.
+      const signals = {
+        manual: { label: "I set this myself", weak: false },
+        "file-name": { label: "From the file name", weak: false },
+        "track-label": { label: "From the Riverside track label", weak: false },
+        "speaker-name": { label: "From the speaker name", weak: false },
+        transcript: { label: "From a transcript intro", weak: true },
+        template: { label: "From a saved show template", weak: false },
+        "spoke-first": { label: "They spoke first", weak: true },
+      };
+
+      // The creator's decision on a suggested role.
+      const decisions = {
+        suggested: "Keep as suggested",
+        confirmed: "Confirm this role",
+      };
+
+      const sampleTracks = [
+        { id: "t1", name: "Dana Brooks", role: "host", signal: "track-label", decision: "confirmed" },
+        { id: "t2", name: "Marcus Lee", role: "guest", signal: "speaker-name", decision: "suggested" },
+        { id: "t3", name: "Priya Anand", role: "host", signal: "spoke-first", decision: "suggested" },
+        { id: "t4", name: "Side channel", role: "", signal: "file-name", decision: "suggested" },
+      ];
+
+      let tracks = structuredClone(sampleTracks);
+
+      const tracksElement = document.querySelector("#tracks");
+      const statusElement = document.querySelector("#status");
+      const issuesElement = document.querySelector("#issues");
+
+      document.querySelector("#addTrack").addEventListener("click", () => {
+        const next = tracks.length + 1;
+        tracks.push({ id: `t${next}-${tracks.length}`, name: `Track ${next}`, role: "", signal: "file-name", decision: "suggested" });
+        render();
+      });
+
+      document.querySelector("#reset").addEventListener("click", () => {
+        tracks = structuredClone(sampleTracks);
+        render();
+      });
+
+      // Single source of truth: turn each track's role + signal + decision (plus any
+      // cross-track conflict) into one of the spec's review states and a creator-facing issue.
+      function evaluate(list) {
+        // Count single-seat roles so two Hosts (or two Co-hosts) surface as a conflict
+        // rather than silently letting whoever spoke first own the seat.
+        const seatCount = {};
+        for (const track of list) {
+          if (roles[track.role] && roles[track.role].single) {
+            seatCount[track.role] = (seatCount[track.role] || 0) + 1;
+          }
+        }
+
+        const results = list.map((track) => {
+          const role = roles[track.role] ? track.role : "";
+          const signal = signals[track.signal] || signals.manual;
+          let state;
+          let issue = null;
+
+          if (role === "") {
+            state = "unassigned";
+            issue = {
+              title: `${track.name || "This track"} has no role yet`,
+              action: "Pick a podcast role so this speaker is placed and labelled correctly.",
+              tone: "blocker",
+            };
+          } else if (roles[role].single && seatCount[role] > 1) {
+            state = "review";
+            issue = {
+              title: `Two tracks are set as ${roles[role].label}`,
+              action: `Only one ${roles[role].label} fits the layout. Confirm the real ${roles[role].label} and change the other.`,
+              tone: "review",
+            };
+          } else if (track.decision === "confirmed") {
+            state = "confirmed";
+          } else if (signal.weak) {
+            state = "review";
+            issue = {
+              title: `Low-confidence role for ${track.name || "this track"}`,
+              action: `We guessed ${roles[role].label.toLowerCase()} ${signal.label.toLowerCase()}. Confirm it or pick the right role.`,
+              tone: "review",
+            };
+          } else {
+            state = "suggested";
+            issue = {
+              title: `Confirm ${roles[role].label} for ${track.name || "this track"}`,
+              action: "Looks right? Confirm the role, or change it from the list.",
+              tone: "info",
+            };
+          }
+
+          return { id: track.id, state, issue };
+        });
+
+        const hasBlock = results.some((result) => result.state === "unassigned");
+        const hasReview = results.some((result) => result.state === "review" || result.state === "suggested");
+        const overall = hasBlock ? "blocked" : hasReview ? "review" : "ready";
+        return { overall, results };
+      }
+
+      function render() {
+        const evaluation = evaluate(tracks);
+        tracksElement.replaceChildren(
+          ...tracks.map((track, index) => renderTrack(track, index, evaluation.results[index])),
+        );
+
+        statusElement.className = `status ${evaluation.overall}`;
+        statusElement.textContent = evaluation.overall === "ready"
+          ? "Roles confirmed"
+          : evaluation.overall === "blocked"
+            ? "Some tracks need a role"
+            : "Review suggested roles";
+
+        const issues = evaluation.results.map((result) => result.issue).filter(Boolean);
+        issuesElement.replaceChildren(
+          ...(issues.length
+            ? issues.map(renderIssue)
+            : [Object.assign(document.createElement("p"), { textContent: "Every track has a confirmed role. Ready for preset selection." })]),
+        );
+      }
+
+      // Map a review state to the badge style. "suggested" and "review" stay distinct
+      // so a plain unconfirmed guess reads differently from a real conflict.
+      function badgeClass(state) {
+        if (state === "confirmed") {
+          return "confirmed";
+        }
+        if (state === "unassigned") {
+          return "unassigned";
+        }
+        if (state === "review") {
+          return "review";
+        }
+        return "suggested";
+      }
+
+      function badgeLabel(state) {
+        return state === "review" ? "needs review" : state;
+      }
+
+      function renderTrack(track, index, result) {
+        const offcamera = roles[track.role] && roles[track.role].offcamera;
+        const article = document.createElement("article");
+        article.className = "track";
+
+        const roleOptions = Object.entries(roles)
+          .map(([value, item]) => `<option value="${value}" ${value === track.role ? "selected" : ""}>${item.label}</option>`)
+          .join("");
+        const signalOptions = Object.entries(signals)
+          .map(([value, item]) => `<option value="${value}" ${value === track.signal ? "selected" : ""}>${item.label}</option>`)
+          .join("");
+        // A track with no role yet cannot be "confirmed" — confirming is only offered
+        // once a role is chosen, so the dropdown never holds a meaningless decision.
+        const canDecide = track.role !== "";
+        const decisionOptions = Object.entries(decisions)
+          .map(([value, label]) => `<option value="${value}" ${value === track.decision ? "selected" : ""}>${label}</option>`)
+          .join("");
+
+        // The scaffold below only contains controlled values (role/signal keys and
+        // their fixed labels, fixed states). The editable track name is written via
+        // .value afterwards, so a typed name can never inject markup into the page.
+        article.innerHTML = `
+          <div class="avatar ${offcamera ? "offcamera" : ""}">
+            <div class="avatar-inner"></div>
+            ${offcamera ? `<span class="tag">Off camera</span>` : ""}
+          </div>
+          <div class="fields">
+            <div class="head">
+              <strong data-role>${roles[track.role] ? roles[track.role].label : "Unassigned"}</strong>
+              <span class="badge ${badgeClass(result.state)}">${badgeLabel(result.state)}</span>
+            </div>
+            <label>Speaker name<input data-field="name" aria-label="Speaker name"></label>
+            <div class="fields-row">
+              <label>Role
+                <select data-field="role" aria-label="Podcast role">${roleOptions}</select>
+              </label>
+              <label>Suggested from
+                <select data-field="signal" aria-label="Where the suggested role came from">${signalOptions}</select>
+              </label>
+            </div>
+            <label>Decision
+              <select data-field="decision" aria-label="Confirm or keep as suggested" ${canDecide ? "" : "disabled"}>${decisionOptions}</select>
+            </label>
+          </div>
+        `;
+
+        article.querySelector('[data-field="name"]').value = track.name;
+
+        article.addEventListener("input", (event) => updateTrack(event, index));
+        article.addEventListener("change", (event) => updateTrack(event, index));
+        return article;
+      }
+
+      function updateTrack(event, index) {
+        const field = event.target.dataset.field;
+        if (!field) {
+          return;
+        }
+        const track = tracks[index];
+        track[field] = event.target.value;
+
+        // Changing the role makes any earlier confirmation stale: a freshly chosen
+        // role drops back to "suggested" so the creator confirms the new choice, and
+        // a role the creator set by hand is no longer a low-confidence guess.
+        if (field === "role") {
+          track.signal = "manual";
+          track.decision = "suggested";
+        }
+        render();
+      }
+
+      function renderIssue(issue) {
+        const article = document.createElement("article");
+        article.className = `issue ${issue.tone}`;
+        // issue.title and issue.action embed the editable track name, so build them
+        // with textContent rather than innerHTML.
+        const strong = document.createElement("strong");
+        strong.textContent = issue.title;
+        const span = document.createElement("span");
+        span.textContent = issue.action;
+        article.append(strong, span);
+        return article;
+      }
+
+      render();
+    </script>
+  </body>
+</html>
