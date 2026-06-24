@@ -80,11 +80,16 @@
       }
 
       .order {
-        width: 30px;
-        height: 30px;
         flex: none;
         align-self: start;
-        margin-top: 2px;
+        display: grid;
+        justify-items: center;
+        gap: 6px;
+      }
+
+      .order .num {
+        width: 30px;
+        height: 30px;
         border-radius: 999px;
         background: #eef4f2;
         color: #2f4a44;
@@ -93,6 +98,30 @@
         display: flex;
         align-items: center;
         justify-content: center;
+      }
+
+      .order .move {
+        display: grid;
+        gap: 4px;
+      }
+
+      .order .move button {
+        min-height: 0;
+        width: 26px;
+        height: 22px;
+        padding: 0;
+        border: 1px solid var(--line);
+        border-radius: 5px;
+        background: #ffffff;
+        color: var(--accent);
+        font-size: 10px;
+        line-height: 1;
+      }
+
+      .order .move button:disabled {
+        color: #c3ccc9;
+        cursor: not-allowed;
+        background: #f4f6f5;
       }
 
       .fields {
@@ -361,10 +390,23 @@
 
       document.querySelector("#add").addEventListener("click", () => {
         const next = segments.length + 1;
-        segments.push({ id: `s${next}-${segments.length}`, type: "teaching", plan: "needs" });
+        segments.push({ id: `s${next}-${segments.length}`, type: "teaching", plan: "include", detail: "" });
         applied = false;
         render();
       });
+
+      // Reorder a segment within the run of show. Arranging order is central to a show
+      // segment system, so each segment can move up or down by one place.
+      function moveSegment(index, delta) {
+        const target = index + delta;
+        if (target < 0 || target >= segments.length) {
+          return;
+        }
+        const [moved] = segments.splice(index, 1);
+        segments.splice(target, 0, moved);
+        applied = false;
+        render();
+      }
 
       applyButton.addEventListener("click", () => {
         if (evaluate().overall !== "ready") {
@@ -520,7 +562,13 @@
         // fixed states, and a fixed detail label/placeholder). The editable detail value
         // is written via .value below, so typed text can never inject markup.
         article.innerHTML = `
-          <div class="order">${order === null ? "&mdash;" : order}</div>
+          <div class="order">
+            <span class="num">${order === null ? "&mdash;" : order}</span>
+            <div class="move">
+              <button type="button" data-move="up" aria-label="Move segment up" ${index === 0 ? "disabled" : ""}>&#9650;</button>
+              <button type="button" data-move="down" aria-label="Move segment down" ${index === segments.length - 1 ? "disabled" : ""}>&#9660;</button>
+            </div>
+          </div>
           <div class="fields">
             <div class="head">
               <strong>${types[segment.type]}</strong>
@@ -541,6 +589,9 @@
         if (needs && segment.plan !== "skip") {
           article.querySelector('[data-field="detail"]').value = segment.detail;
         }
+
+        article.querySelector('[data-move="up"]').addEventListener("click", () => moveSegment(index, -1));
+        article.querySelector('[data-move="down"]').addEventListener("click", () => moveSegment(index, 1));
 
         // Typing the detail updates live (badge + summary) without rebuilding the field,
         // so it keeps focus; selects re-render fully on change.
