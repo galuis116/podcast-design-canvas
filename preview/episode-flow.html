@@ -1,0 +1,773 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Podcast Design Canvas — Episode flow</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #16211f;
+        --muted: #5e6b67;
+        --line: #d9e0dd;
+        --panel: #f7faf8;
+        --accent: #136f63;
+        --accent-ink: #075246;
+        --warn: #a15c00;
+        --block: #a52828;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        background: #ffffff;
+      }
+
+      a {
+        color: var(--accent-ink);
+      }
+
+      main {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 28px 20px 56px;
+      }
+
+      .top {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      h1 {
+        font-size: 26px;
+        margin: 0 0 4px;
+      }
+
+      .lede {
+        color: var(--muted);
+        margin: 0 0 18px;
+        max-width: 640px;
+      }
+
+      .back {
+        font-size: 13px;
+        font-weight: 700;
+        text-decoration: none;
+      }
+
+      .stepper {
+        list-style: none;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 0 0 8px;
+        padding: 0;
+      }
+
+      .stepper li {
+        flex: 1 1 150px;
+      }
+
+      .stepper button {
+        width: 100%;
+        text-align: left;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #ffffff;
+        padding: 10px 12px;
+        cursor: pointer;
+        font: inherit;
+        display: grid;
+        gap: 2px;
+      }
+
+      .stepper button:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+
+      .stepper .n {
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--muted);
+      }
+
+      .stepper .t {
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .stepper li.current button {
+        border-color: var(--accent);
+        box-shadow: inset 0 0 0 1px var(--accent);
+        background: #f1f9f6;
+      }
+
+      .stepper li.done .n::after {
+        content: " ✓";
+        color: var(--accent-ink);
+      }
+
+      .progress {
+        height: 6px;
+        border-radius: 999px;
+        background: #e7efec;
+        overflow: hidden;
+        margin: 8px 0 22px;
+      }
+
+      .progress i {
+        display: block;
+        height: 100%;
+        background: var(--accent);
+        transition: width 0.2s ease;
+      }
+
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: var(--panel);
+        padding: 18px;
+      }
+
+      .panel h2 {
+        margin: 0 0 4px;
+        font-size: 19px;
+      }
+
+      .panel .hint {
+        color: var(--muted);
+        margin: 0 0 16px;
+        font-size: 14px;
+      }
+
+      .row {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 0;
+        border-top: 1px solid var(--line);
+      }
+
+      .row:first-of-type {
+        border-top: none;
+      }
+
+      .avatar {
+        width: 38px;
+        height: 38px;
+        border-radius: 999px;
+        background: linear-gradient(160deg, #6db5a8, #1d554d);
+        color: #fff;
+        font-weight: 800;
+        display: grid;
+        place-items: center;
+        font-size: 14px;
+      }
+
+      .avatar.audio {
+        background: repeating-linear-gradient(135deg, #c9d2cf, #c9d2cf 6px, #dde3e1 6px, #dde3e1 12px);
+        color: #5e6b67;
+      }
+
+      .who strong {
+        display: block;
+        font-size: 14px;
+      }
+
+      .who span {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      select,
+      input[type="text"] {
+        min-height: 38px;
+        border: 1px solid #bfcbc7;
+        border-radius: 6px;
+        background: #fff;
+        color: var(--ink);
+        font: inherit;
+        padding: 6px 9px;
+      }
+
+      .toggles {
+        display: grid;
+        gap: 10px;
+      }
+
+      .toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 10px 12px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fff;
+      }
+
+      .toggle .label strong {
+        display: block;
+        font-size: 14px;
+      }
+
+      .toggle .label span {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        min-height: 26px;
+        border-radius: 999px;
+        padding: 0 10px;
+        font-weight: 700;
+        font-size: 12px;
+        white-space: nowrap;
+      }
+
+      .badge.ok {
+        color: #075246;
+        background: #dff5ef;
+      }
+
+      .badge.warn {
+        color: #7a4400;
+        background: #fff1d6;
+      }
+
+      .badge.muted {
+        color: #5e6b67;
+        background: #eceeed;
+      }
+
+      .caption-line {
+        display: grid;
+        gap: 8px;
+        padding: 12px 0;
+        border-top: 1px solid var(--line);
+      }
+
+      .caption-line .preview {
+        background: #10201d;
+        color: #f4f7f6;
+        border-radius: 6px;
+        padding: 8px 10px;
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      .caption-line .controls {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .review-summary {
+        display: grid;
+        gap: 8px;
+      }
+
+      .review-summary .item {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 10px 12px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fff;
+        font-size: 14px;
+      }
+
+      .review-summary .item span {
+        color: var(--muted);
+      }
+
+      .done-banner {
+        border: 1px solid #bfe3d7;
+        border-radius: 8px;
+        background: #eef9f4;
+        color: #075246;
+        font-weight: 700;
+        padding: 14px;
+        margin-bottom: 14px;
+      }
+
+      .done-banner[hidden] {
+        display: none;
+      }
+
+      .nav {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      button.btn {
+        min-height: 42px;
+        border: 1px solid #0f5d53;
+        border-radius: 6px;
+        background: var(--accent);
+        color: #fff;
+        font: inherit;
+        font-weight: 700;
+        padding: 9px 16px;
+        cursor: pointer;
+      }
+
+      button.btn.secondary {
+        background: #fff;
+        color: var(--accent);
+      }
+
+      button.btn:disabled {
+        background: #cfe0db;
+        border-color: #cfe0db;
+        color: #6f817b;
+        cursor: not-allowed;
+      }
+
+      .gate {
+        color: var(--warn);
+        font-size: 13px;
+        align-self: center;
+      }
+
+      @media (max-width: 640px) {
+        .row {
+          grid-template-columns: auto 1fr;
+        }
+
+        .row > select {
+          grid-column: 1 / -1;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main aria-label="Podcast Design Canvas episode flow">
+      <div class="top">
+        <div>
+          <h1>Guided episode flow</h1>
+          <p class="lede">One connected path from imported speaker files to a publish-ready episode. Each step builds on the last, and the final readiness reflects every choice you made.</p>
+        </div>
+        <a class="back" href="./index.html">← All screens</a>
+      </div>
+
+      <ol class="stepper" id="stepper" aria-label="Episode steps"></ol>
+      <div class="progress"><i id="progress"></i></div>
+
+      <section class="panel" id="panel" aria-live="polite"></section>
+
+      <div class="nav">
+        <button type="button" class="btn secondary" id="back">Back</button>
+        <span class="gate" id="gate"></span>
+        <button type="button" class="btn" id="next">Next step</button>
+      </div>
+    </main>
+
+    <script>
+      // One shared episode model that every step reads and writes, so the flow behaves
+      // like a single product rather than separate demos.
+      const steps = [
+        { id: "source", title: "Source media health" },
+        { id: "sync", title: "Speaker sync" },
+        { id: "audio", title: "Audio cleanup" },
+        { id: "captions", title: "Caption review" },
+        { id: "export", title: "Export readiness" },
+      ];
+
+      const sourceStates = { ready: "Looks good", review: "Needs review", "audio-only": "Audio-only" };
+      const syncStates = { aligned: "Aligned", nudge: "Needs a small nudge" };
+      const captionDecisions = { review: "Decide later", confirm: "Looks right", edit: "I fixed the wording" };
+
+      const episode = {
+        step: 0,
+        speakers: [
+          { id: "host", role: "Host", name: "Dana Brooks", source: "ready", sync: "aligned" },
+          { id: "g1", role: "Guest 1", name: "Marcus Lee", source: "review", sync: "nudge" },
+          { id: "g2", role: "Guest 2", name: "Priya Anand", source: "audio-only", sync: "aligned" },
+        ],
+        audio: { noise: true, levels: true, clarity: false, applied: false },
+        captions: [
+          { id: "c1", text: "Today we're joined by Marcus Lee.", flag: "Uncertain name", decision: "review" },
+          { id: "c2", text: "The the launch was huge.", flag: "Word lost to cross-talk", decision: "review" },
+        ],
+        exported: false,
+      };
+
+      const stepperEl = document.querySelector("#stepper");
+      const progressEl = document.querySelector("#progress");
+      const panelEl = document.querySelector("#panel");
+      const backEl = document.querySelector("#back");
+      const nextEl = document.querySelector("#next");
+      const gateEl = document.querySelector("#gate");
+
+      backEl.addEventListener("click", () => {
+        if (episode.step > 0) {
+          episode.step -= 1;
+          render();
+        }
+      });
+      nextEl.addEventListener("click", () => {
+        if (!stepComplete(episode.step)) {
+          return;
+        }
+        if (episode.step < steps.length - 1) {
+          episode.step += 1;
+          render();
+        }
+      });
+
+      const initial = (name) => (name.trim()[0] || "?").toUpperCase();
+
+      // Whether the current step is resolved enough to move on. The export step is always
+      // reachable; it just reflects the state.
+      function stepComplete(index) {
+        const id = steps[index].id;
+        if (id === "source") {
+          return episode.speakers.every((s) => s.source !== "review");
+        }
+        if (id === "sync") {
+          return true; // every speaker is either aligned or set to nudge, both resolved
+        }
+        if (id === "audio") {
+          return episode.audio.applied;
+        }
+        if (id === "captions") {
+          return episode.captions.every((c) => c.decision !== "review");
+        }
+        return true;
+      }
+
+      function render() {
+        renderStepper();
+        const ratio = (episode.step + (stepComplete(episode.step) ? 1 : 0)) / steps.length;
+        progressEl.style.width = `${Math.round(ratio * 100)}%`;
+        renderPanel();
+        renderNav();
+      }
+
+      function renderStepper() {
+        stepperEl.replaceChildren(...steps.map((step, index) => {
+          const li = document.createElement("li");
+          if (index === episode.step) {
+            li.className = "current";
+          } else if (index < episode.step) {
+            li.className = "done";
+          }
+          const button = document.createElement("button");
+          button.type = "button";
+          // Earlier steps stay clickable so a creator can go back; later steps unlock as
+          // each one is completed.
+          button.disabled = index > episode.step;
+          const n = document.createElement("span");
+          n.className = "n";
+          n.textContent = `Step ${index + 1}`;
+          const t = document.createElement("span");
+          t.className = "t";
+          t.textContent = step.title;
+          button.append(n, t);
+          button.addEventListener("click", () => {
+            if (index <= episode.step) {
+              episode.step = index;
+              render();
+            }
+          });
+          li.append(button);
+          return li;
+        }));
+      }
+
+      function renderNav() {
+        backEl.disabled = episode.step === 0;
+        const last = episode.step === steps.length - 1;
+        nextEl.textContent = last ? "Done" : "Next step";
+        nextEl.disabled = last || !stepComplete(episode.step);
+        gateEl.textContent = !last && !stepComplete(episode.step) ? gateMessage(episode.step) : "";
+      }
+
+      function gateMessage(index) {
+        const id = steps[index].id;
+        if (id === "source") {
+          return "Resolve each speaker file to continue.";
+        }
+        if (id === "audio") {
+          return "Apply the audio cleanup to continue.";
+        }
+        if (id === "captions") {
+          return "Decide on each flagged caption to continue.";
+        }
+        return "";
+      }
+
+      function renderPanel() {
+        const id = steps[episode.step].id;
+        const builders = { source: stepSource, sync: stepSync, audio: stepAudio, captions: stepCaptions, export: stepExport };
+        panelEl.replaceChildren(...builders[id]());
+      }
+
+      function heading(title, hint) {
+        const h = document.createElement("h2");
+        h.textContent = title;
+        const p = document.createElement("p");
+        p.className = "hint";
+        p.textContent = hint;
+        return [h, p];
+      }
+
+      function speakerRow(speaker, controlField, optionsMap, onChange) {
+        const row = document.createElement("div");
+        row.className = "row";
+        const avatar = document.createElement("div");
+        avatar.className = `avatar ${speaker.source === "audio-only" ? "audio" : ""}`;
+        avatar.textContent = initial(speaker.name);
+        const who = document.createElement("div");
+        who.className = "who";
+        const name = document.createElement("strong");
+        name.textContent = speaker.name;
+        const role = document.createElement("span");
+        role.textContent = speaker.role;
+        who.append(name, role);
+        const select = document.createElement("select");
+        select.setAttribute("aria-label", `${speaker.name} ${controlField}`);
+        for (const [value, label] of Object.entries(optionsMap)) {
+          const option = document.createElement("option");
+          option.value = value;
+          option.textContent = label;
+          option.selected = value === speaker[controlField];
+          select.append(option);
+        }
+        select.addEventListener("change", (event) => {
+          speaker[controlField] = event.target.value;
+          onChange();
+          render();
+        });
+        row.append(avatar, who, select);
+        return row;
+      }
+
+      function stepSource() {
+        const nodes = heading("Check source media health", "Confirm each speaker's recording before styling. A track with no usable video can continue as audio-only.");
+        for (const speaker of episode.speakers) {
+          nodes.push(speakerRow(speaker, "source", sourceStates, () => {}));
+        }
+        return nodes;
+      }
+
+      function stepSync() {
+        const audioOnly = episode.speakers.filter((s) => s.source === "audio-only").map((s) => s.name);
+        const note = audioOnly.length
+          ? `Carrying ${audioOnly.join(" and ")} forward as audio-only — no video to align there.`
+          : "Align the separate speaker recordings so everyone is in time.";
+        const nodes = heading("Repair speaker sync", note);
+        for (const speaker of episode.speakers) {
+          if (speaker.source === "audio-only") {
+            const row = document.createElement("div");
+            row.className = "row";
+            const avatar = document.createElement("div");
+            avatar.className = "avatar audio";
+            avatar.textContent = initial(speaker.name);
+            const who = document.createElement("div");
+            who.className = "who";
+            const name = document.createElement("strong");
+            name.textContent = speaker.name;
+            const role = document.createElement("span");
+            role.textContent = `${speaker.role} · audio-only`;
+            who.append(name, role);
+            const badge = document.createElement("span");
+            badge.className = "badge muted";
+            badge.textContent = "no video to sync";
+            row.append(avatar, who, badge);
+            nodes.push(row);
+          } else {
+            nodes.push(speakerRow(speaker, "sync", syncStates, () => {}));
+          }
+        }
+        return nodes;
+      }
+
+      function stepAudio() {
+        const nodes = heading("Clean up audio", "Pick the quality improvements to apply across the episode, then apply them. This carries into the caption review next.");
+        const toggles = document.createElement("div");
+        toggles.className = "toggles";
+        const opts = [
+          ["noise", "Reduce room noise", "Quiet hum and background under speech."],
+          ["levels", "Balance speaker volume", "Even out loud and quiet speakers."],
+          ["clarity", "Improve speech clarity", "Make voices a little crisper."],
+        ];
+        for (const [key, label, desc] of opts) {
+          const toggle = document.createElement("label");
+          toggle.className = "toggle";
+          const text = document.createElement("span");
+          text.className = "label";
+          const strong = document.createElement("strong");
+          strong.textContent = label;
+          const span = document.createElement("span");
+          span.textContent = desc;
+          text.append(strong, span);
+          const input = document.createElement("input");
+          input.type = "checkbox";
+          input.checked = episode.audio[key];
+          input.setAttribute("aria-label", label);
+          input.addEventListener("change", (event) => {
+            episode.audio[key] = event.target.checked;
+            episode.audio.applied = false;
+            render();
+          });
+          toggle.append(text, input);
+          toggles.append(toggle);
+        }
+        nodes.push(toggles);
+
+        const apply = document.createElement("button");
+        apply.type = "button";
+        apply.className = "btn";
+        apply.style.marginTop = "14px";
+        apply.textContent = episode.audio.applied ? "Audio cleanup applied ✓" : "Apply audio cleanup";
+        apply.disabled = episode.audio.applied;
+        apply.addEventListener("click", () => {
+          episode.audio.applied = true;
+          render();
+        });
+        nodes.push(apply);
+        return nodes;
+      }
+
+      function stepCaptions() {
+        const applied = [];
+        if (episode.audio.noise) applied.push("noise reduced");
+        if (episode.audio.levels) applied.push("levels balanced");
+        if (episode.audio.clarity) applied.push("clarity improved");
+        const hint = applied.length
+          ? `After cleanup (${applied.join(", ")}), confirm the captions that the system flagged.`
+          : "Confirm the captions that the system flagged.";
+        const nodes = heading("Review caption quality", hint);
+        for (const line of episode.captions) {
+          const wrap = document.createElement("div");
+          wrap.className = "caption-line";
+          const preview = document.createElement("div");
+          preview.className = "preview";
+          preview.textContent = line.text || "(empty caption)";
+          const controls = document.createElement("div");
+          controls.className = "controls";
+          const input = document.createElement("input");
+          input.type = "text";
+          input.value = line.text;
+          input.setAttribute("aria-label", "Caption text");
+          input.addEventListener("input", (event) => {
+            line.text = event.target.value;
+            preview.textContent = line.text || "(empty caption)";
+            renderNav();
+          });
+          const select = document.createElement("select");
+          select.setAttribute("aria-label", `Decision for: ${line.flag}`);
+          for (const [value, label] of Object.entries(captionDecisions)) {
+            const option = document.createElement("option");
+            option.value = value;
+            option.textContent = label;
+            option.selected = value === line.decision;
+            select.append(option);
+          }
+          select.addEventListener("change", (event) => {
+            line.decision = event.target.value;
+            render();
+          });
+          controls.append(input, select);
+          const flag = document.createElement("span");
+          flag.className = "badge warn";
+          flag.textContent = line.flag;
+          wrap.append(flag, preview, controls);
+          nodes.push(wrap);
+        }
+        return nodes;
+      }
+
+      function stepExport() {
+        const nodes = heading("Review export readiness", "Everything you did in the earlier steps rolls up here. Fix anything outstanding before you export.");
+
+        const banner = document.createElement("div");
+        banner.className = "done-banner";
+        banner.hidden = !episode.exported;
+        banner.textContent = "Episode exported — episode-full.mp4 is ready to publish.";
+        nodes.push(banner);
+
+        const ready = episode.speakers.filter((s) => s.source === "ready").length;
+        const audioOnly = episode.speakers.filter((s) => s.source === "audio-only").length;
+        const audioBits = [];
+        if (episode.audio.noise) audioBits.push("noise");
+        if (episode.audio.levels) audioBits.push("levels");
+        if (episode.audio.clarity) audioBits.push("clarity");
+
+        const summary = document.createElement("div");
+        summary.className = "review-summary";
+        const items = [
+          ["Speakers", `${ready} on camera, ${audioOnly} audio-only — all confirmed`, true],
+          ["Sync", "All speaker tracks aligned", true],
+          ["Audio", episode.audio.applied ? `Cleaned (${audioBits.join(", ") || "no changes"})` : "Not cleaned yet", episode.audio.applied],
+          ["Captions", episode.captions.every((c) => c.decision !== "review") ? "Reviewed" : "Still needs review", episode.captions.every((c) => c.decision !== "review")],
+        ];
+        for (const [label, value, ok] of items) {
+          const item = document.createElement("div");
+          item.className = "item";
+          const left = document.createElement("strong");
+          left.textContent = label;
+          const right = document.createElement("span");
+          right.textContent = value;
+          const badge = document.createElement("span");
+          badge.className = `badge ${ok ? "ok" : "warn"}`;
+          badge.textContent = ok ? "ready" : "check";
+          const rightWrap = document.createElement("div");
+          rightWrap.style.display = "flex";
+          rightWrap.style.gap = "10px";
+          rightWrap.style.alignItems = "center";
+          rightWrap.append(right, badge);
+          item.append(left, rightWrap);
+          summary.append(item);
+        }
+        nodes.push(summary);
+
+        const exportBtn = document.createElement("button");
+        exportBtn.type = "button";
+        exportBtn.className = "btn";
+        exportBtn.style.marginTop = "16px";
+        const allReady = items.every(([, , ok]) => ok);
+        exportBtn.textContent = episode.exported ? "Re-export" : "Export episode";
+        exportBtn.disabled = !allReady;
+        exportBtn.addEventListener("click", () => {
+          if (!allReady) {
+            return;
+          }
+          episode.exported = true;
+          render();
+        });
+        nodes.push(exportBtn);
+        if (!allReady) {
+          const gate = document.createElement("p");
+          gate.className = "gate";
+          gate.style.marginTop = "8px";
+          gate.textContent = "Go back and finish the steps marked “check” before exporting.";
+          nodes.push(gate);
+        }
+        return nodes;
+      }
+
+      render();
+    </script>
+  </body>
+</html>
