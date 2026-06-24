@@ -136,6 +136,24 @@
         color: var(--muted);
       }
 
+      .head-right {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .remove {
+        min-height: 0;
+        padding: 4px 9px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #ffffff;
+        color: #8b1e1e;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
       .badge {
         display: inline-flex;
         align-items: center;
@@ -267,7 +285,7 @@
           <h2>Caption review summary</h2>
           <div id="status" class="status ready">Captions look good</div>
           <div id="issues" class="issues"></div>
-          <p class="summary-note">We only surface lines worth your attention. A correction you confirm applies wherever that word repeats.</p>
+          <p class="summary-note">We only surface lines worth your attention. Confident lines stay out of your way, so you review just the few that need you.</p>
         </aside>
       </section>
     </main>
@@ -284,14 +302,14 @@
         "long-line": { label: "Line is too long to read", weak: false, layout: true, title: "This line is too long to read in time" },
       };
 
-      // The creator's decision. "confirm" accepts the line as written; "edit" means they
-      // corrected the words above; "move"/"split" resolve a layout collision.
+      // The creator's decision for a line. These record what the creator did — "edit" is
+      // backed by the caption text field above; the others mark how they handled it.
       const actions = {
         review: "Decide later",
         confirm: "Looks right",
         edit: "I fixed the wording",
-        move: "Move the caption",
-        split: "Split the line",
+        move: "I moved it clear",
+        split: "I shortened the line",
       };
 
       // Which actions make sense for each flag.
@@ -351,7 +369,7 @@
             state = "confirmed";
           } else {
             state = "fixed";
-            issue = { title: `Line resolved: ${actions[action].toLowerCase()}`, action: "Looks good for the finished captions.", tone: "info" };
+            issue = { title: `Marked resolved: ${actions[action].toLowerCase()}`, action: "Counted as handled for the finished captions.", tone: "info" };
           }
 
           return { id: line.id, state, issue };
@@ -441,7 +459,10 @@
           <div class="caption-preview"><span data-preview></span></div>
           <div class="head">
             <strong>Caption line</strong>
-            <span class="badge ${badgeClass(result.state)}">${badgeLabel(result.state)}</span>
+            <span class="head-right">
+              <span class="badge ${badgeClass(result.state)}">${badgeLabel(result.state)}</span>
+              <button type="button" class="remove" data-remove aria-label="Remove caption line">Remove</button>
+            </span>
           </div>
           <div class="fields">
             <label>Caption text<input data-field="text" aria-label="Caption text"></label>
@@ -458,6 +479,11 @@
 
         article.querySelector('[data-field="text"]').value = line.text;
         article.querySelector("[data-preview]").textContent = line.text || "(empty caption)";
+
+        article.querySelector("[data-remove]").addEventListener("click", () => {
+          lines.splice(index, 1);
+          render();
+        });
 
         // Text field updates live on input but only refreshes badge/preview/summary, so it
         // keeps focus. Selects re-render fully on change (safe — no caret).
