@@ -338,11 +338,12 @@
           let state;
           let issue = null;
 
-          if (line.flag === "clear") {
-            state = "confirmed";
-          } else if (!line.text.trim()) {
+          if (!line.text.trim()) {
+            // An empty caption is never publish-ready, whatever the flag says.
             state = "review";
             issue = { title: "A caption line is empty", action: "Add the caption text, or remove the line.", tone: "review" };
+          } else if (line.flag === "clear") {
+            state = "confirmed";
           } else if (action === "review") {
             state = "review";
             issue = { title: flag.title, action: "Confirm the wording, fix it, or resolve the overlap.", tone: "review" };
