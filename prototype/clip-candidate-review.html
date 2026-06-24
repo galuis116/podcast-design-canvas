@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Clip Candidate Review Prototype</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #16211f;
+        --muted: #5e6b67;
+        --line: #d9e0dd;
+        --panel: #f7faf8;
+        --accent: #136f63;
+        --warn: #a15c00;
+        --block: #a52828;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        background: #ffffff;
+      }
+
+      main {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 32px 20px 48px;
+      }
+
+      h1,
+      h2,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        font-size: 32px;
+        line-height: 1.1;
+        margin-bottom: 8px;
+      }
+
+      .lede {
+        color: var(--muted);
+        max-width: 760px;
+      }
+
+      .workspace {
+        display: grid;
+        grid-template-columns: minmax(0, 1.5fr) minmax(320px, 0.85fr);
+        gap: 24px;
+        margin-top: 28px;
+      }
+
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+        padding: 18px;
+      }
+
+      .clips {
+        display: grid;
+        gap: 14px;
+      }
+
+      .clip {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 14px;
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #ffffff;
+      }
+
+      .fields {
+        display: grid;
+        gap: 10px;
+        align-content: start;
+      }
+
+      .fields-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      label {
+        display: grid;
+        gap: 6px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      select {
+        width: 100%;
+        min-height: 40px;
+        border: 1px solid #bfcbc7;
+        border-radius: 6px;
+        background: #ffffff;
+        color: var(--ink);
+        font: inherit;
+        padding: 8px 10px;
+      }
+
+      .head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .head strong {
+        font-size: 14px;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        border-radius: 999px;
+        padding: 0 11px;
+        font-weight: 700;
+        font-size: 13px;
+        white-space: nowrap;
+      }
+
+      .badge.approved {
+        color: #075246;
+        background: #dff5ef;
+      }
+
+      .badge.suggested {
+        color: #2a4c8a;
+        background: #e2ebfb;
+      }
+
+      .badge.rejected {
+        color: #5e6b67;
+        background: #eceeed;
+      }
+
+      .status {
+        display: inline-flex;
+        align-items: center;
+        min-height: 32px;
+        border-radius: 999px;
+        padding: 0 12px;
+        font-weight: 800;
+      }
+
+      .status.ready {
+        color: #075246;
+        background: #dff5ef;
+      }
+
+      .status.review {
+        color: #2a4c8a;
+        background: #e2ebfb;
+      }
+
+      .thumb {
+        position: relative;
+        width: 120px;
+        aspect-ratio: 9 / 16;
+        flex: none;
+        align-self: start;
+        border-radius: 6px;
+        overflow: hidden;
+        background: linear-gradient(160deg, #6db5a8, #1d554d);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+      }
+
+      .thumb .face {
+        position: absolute;
+        top: 22%;
+        left: 50%;
+        width: 44%;
+        aspect-ratio: 1;
+        transform: translateX(-50%);
+        border-radius: 50%;
+        background: #e8f4f1;
+      }
+
+      .thumb .cap {
+        position: absolute;
+        left: 8%;
+        right: 8%;
+        bottom: 16%;
+        height: 12%;
+        border-radius: 3px;
+        background: rgba(16, 24, 22, 0.85);
+      }
+
+      .thumb .time {
+        position: absolute;
+        left: 5px;
+        top: 5px;
+        border-radius: 4px;
+        background: rgba(0, 0, 0, 0.5);
+        color: #fff;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 2px 6px;
+      }
+
+      .thumb.rejected {
+        filter: grayscale(0.7) brightness(0.92);
+      }
+
+      .excerpt {
+        color: var(--muted);
+        font-size: 13px;
+        font-style: italic;
+      }
+
+      .issues {
+        display: grid;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .issue {
+        border-left: 4px solid var(--accent);
+        border-radius: 6px;
+        background: #ffffff;
+        padding: 12px;
+      }
+
+      .issue strong {
+        display: block;
+        margin-bottom: 4px;
+      }
+
+      .issue span {
+        color: var(--muted);
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      button {
+        min-height: 40px;
+        border: 1px solid #0f5d53;
+        border-radius: 6px;
+        background: var(--accent);
+        color: #ffffff;
+        font: inherit;
+        font-weight: 700;
+        padding: 8px 12px;
+        cursor: pointer;
+      }
+
+      button.secondary {
+        background: #ffffff;
+        color: var(--accent);
+      }
+
+      .summary-note {
+        color: var(--muted);
+        font-size: 13px;
+        margin: 14px 0 0;
+      }
+
+      @media (max-width: 840px) {
+        .workspace {
+          grid-template-columns: 1fr;
+        }
+
+        .clip {
+          grid-template-columns: 1fr;
+        }
+
+        .fields-row {
+          grid-template-columns: 1fr;
+        }
+
+        .thumb {
+          width: 100%;
+          aspect-ratio: 16 / 9;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Clip candidate review</h1>
+      <p class="lede">After your full episode is done, review the short clips we suggest from its strongest moments, approve the ones you want, and keep them linked to the source episode. Reviewing clips never changes your long-form edit.</p>
+
+      <section class="workspace" aria-label="Clip candidate review workspace">
+        <div class="panel">
+          <h2>Suggested clips</h2>
+          <div class="clips" id="clips"></div>
+          <div class="actions">
+            <button type="button" id="addClip">Add a candidate</button>
+            <button type="button" class="secondary" id="reset">Reset sample</button>
+          </div>
+        </div>
+
+        <aside class="panel" aria-live="polite" aria-label="Clip review summary">
+          <h2>Clip review summary</h2>
+          <div id="status" class="status ready">No clips approved yet</div>
+          <div id="issues" class="issues"></div>
+          <p class="summary-note">Approved clips stay downstream copies that point back to the source moment &mdash; your long-form episode is never edited to chase clips.</p>
+        </aside>
+      </section>
+    </main>
+
+    <script>
+      // Why a moment was suggested as a clip, with a sample timestamp and excerpt so the
+      // card reads like a real review surface rather than an abstract tile.
+      const signals = {
+        "guest-answer": { label: "Strong guest answer", at: "00:12:40", excerpt: "“That was the moment we knew it would work.”" },
+        teaching: { label: "Clear teaching moment", at: "00:24:05", excerpt: "“Here's the simplest way to think about it...”" },
+        title: { label: "Title moment", at: "00:31:18", excerpt: "“The one decision that changed everything.”" },
+        energy: { label: "High-energy exchange", at: "00:38:52", excerpt: "“Wait — you actually did that live?”" },
+        summary: { label: "Host summary", at: "00:47:30", excerpt: "“So the takeaway for builders is...”" },
+        "sponsor-safe": { label: "Sponsor-safe moment", at: "00:05:10", excerpt: "“Brought to you by our partners at...”" },
+      };
+
+      // Clip length options.
+      const lengths = {
+        "0:15": "15 seconds",
+        "0:30": "30 seconds",
+        "0:60": "60 seconds",
+      };
+
+      // The creator's decision on a candidate.
+      const decisions = {
+        suggested: "Keep as suggested",
+        approved: "Approve clip",
+        adjusted: "Approve, trimmed",
+        rejected: "Reject",
+      };
+
+      const sampleClips = [
+        { id: "c1", signal: "guest-answer", length: "0:30", decision: "approved" },
+        { id: "c2", signal: "teaching", length: "0:60", decision: "suggested" },
+        { id: "c3", signal: "energy", length: "0:15", decision: "suggested" },
+        { id: "c4", signal: "summary", length: "0:30", decision: "rejected" },
+      ];
+
+      let clips = structuredClone(sampleClips);
+
+      const clipsElement = document.querySelector("#clips");
+      const statusElement = document.querySelector("#status");
+      const issuesElement = document.querySelector("#issues");
+
+      document.querySelector("#addClip").addEventListener("click", () => {
+        const next = clips.length;
+        const signalKeys = Object.keys(signals);
+        clips.push({ id: `c${next + 1}-${next}`, signal: signalKeys[next % signalKeys.length], length: "0:30", decision: "suggested" });
+        render();
+      });
+
+      document.querySelector("#reset").addEventListener("click", () => {
+        clips = structuredClone(sampleClips);
+        render();
+      });
+
+      // Single source of truth: turn each candidate's decision into a review state and a
+      // plain-language note. Reviewing is the whole workflow here; there is no separate
+      // build step, and nothing changes the long-form edit.
+      function evaluate(list) {
+        const results = list.map((clip) => {
+          const signal = signals[clip.signal] || signals["guest-answer"];
+          let state;
+          let issue = null;
+          if (clip.decision === "rejected") {
+            state = "rejected";
+            issue = { title: `${signal.label} (${signal.at}): not a clip`, action: "Left out of your clips.", tone: "info" };
+          } else if (clip.decision === "approved" || clip.decision === "adjusted") {
+            state = "approved";
+            const how = clip.decision === "adjusted" ? "trimmed and approved" : "approved";
+            issue = { title: `${signal.label} (${signal.at}): ${how}`, action: `${lengths[clip.length]} clip, linked back to the source moment.`, tone: "info" };
+          } else {
+            state = "suggested";
+          }
+          return { id: clip.id, state, issue };
+        });
+
+        const approved = results.filter((result) => result.state === "approved").length;
+        const overall = approved > 0 ? "ready" : "review";
+        return { overall, approved, results };
+      }
+
+      function render() {
+        const evaluation = evaluate(clips);
+        clipsElement.replaceChildren(
+          ...clips.map((clip, index) => renderClip(clip, index, evaluation.results[index])),
+        );
+        updateSummary(evaluation);
+      }
+
+      function updateSummary(evaluation) {
+        statusElement.className = `status ${evaluation.overall}`;
+        statusElement.textContent = evaluation.approved > 0
+          ? `${evaluation.approved} clip${evaluation.approved === 1 ? "" : "s"} approved`
+          : "No clips approved yet";
+
+        const issues = evaluation.results.map((result) => result.issue).filter(Boolean);
+        issuesElement.replaceChildren(
+          ...(issues.length
+            ? issues.map(renderIssue)
+            : [Object.assign(document.createElement("p"), { textContent: "Review the candidates and approve the ones you want as clips." })]),
+        );
+      }
+
+      function badgeClass(state) {
+        if (state === "approved") {
+          return "approved";
+        }
+        if (state === "rejected") {
+          return "rejected";
+        }
+        return "suggested";
+      }
+
+      function badgeLabel(state) {
+        return state;
+      }
+
+      function renderClip(clip, index, result) {
+        const signal = signals[clip.signal] || signals["guest-answer"];
+        const article = document.createElement("article");
+        article.className = "clip";
+
+        const signalOptions = Object.entries(signals)
+          .map(([value, item]) => `<option value="${value}" ${value === clip.signal ? "selected" : ""}>${item.label}</option>`)
+          .join("");
+        const lengthOptions = Object.entries(lengths)
+          .map(([value, label]) => `<option value="${value}" ${value === clip.length ? "selected" : ""}>${label}</option>`)
+          .join("");
+        const decisionOptions = Object.entries(decisions)
+          .map(([value, label]) => `<option value="${value}" ${value === clip.decision ? "selected" : ""}>${label}</option>`)
+          .join("");
+
+        // Every interpolated value is a controlled key or its fixed label/sample text;
+        // there is no user-editable free text, so the scaffold is safe to build with
+        // innerHTML. The transcript excerpt is fixed sample copy, set via textContent.
+        article.innerHTML = `
+          <div class="thumb ${clip.decision === "rejected" ? "rejected" : ""}">
+            <span class="face"></span>
+            <span class="cap"></span>
+            <span class="time">${signal.at}</span>
+          </div>
+          <div class="fields">
+            <div class="head">
+              <strong>${signal.label}</strong>
+              <span class="badge ${badgeClass(result.state)}">${badgeLabel(result.state)}</span>
+            </div>
+            <p class="excerpt" data-excerpt></p>
+            <div class="fields-row">
+              <label>Why it's a clip
+                <select data-field="signal" aria-label="Why the moment was suggested">${signalOptions}</select>
+              </label>
+              <label>Length
+                <select data-field="length" aria-label="Clip length">${lengthOptions}</select>
+              </label>
+            </div>
+            <label>Decision
+              <select data-field="decision" aria-label="Approve, trim, keep, or reject">${decisionOptions}</select>
+            </label>
+          </div>
+        `;
+
+        article.querySelector("[data-excerpt]").textContent = signal.excerpt;
+
+        article.addEventListener("change", (event) => onChange(event, index));
+        return article;
+      }
+
+      function onChange(event, index) {
+        const field = event.target.dataset.field;
+        if (!field) {
+          return;
+        }
+        clips[index][field] = event.target.value;
+        render();
+      }
+
+      function renderIssue(issue) {
+        const article = document.createElement("article");
+        article.className = "issue";
+        const strong = document.createElement("strong");
+        strong.textContent = issue.title;
+        const span = document.createElement("span");
+        span.textContent = issue.action;
+        article.append(strong, span);
+        return article;
+      }
+
+      render();
+    </script>
+  </body>
+</html>
