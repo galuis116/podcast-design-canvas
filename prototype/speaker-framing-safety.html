@@ -328,6 +328,25 @@
         margin-bottom: 4px;
       }
 
+      .issue .fix-link {
+        display: inline-block;
+        margin-top: 8px;
+        color: var(--accent, #136f63);
+        font-weight: 700;
+        font-size: 13px;
+        text-decoration: none;
+      }
+
+      .issue .fix-link:hover {
+        text-decoration: underline;
+      }
+
+      .issue .fix-link:focus-visible {
+        text-decoration: underline;
+        outline: 2px solid var(--accent, #136f63);
+        outline-offset: 2px;
+      }
+
       .issue span {
         color: var(--muted);
       }
@@ -456,6 +475,16 @@
         },
       };
 
+      // Each framing problem has a screen that owns its deeper fix.
+      const fixScreens = {
+        captions: { file: "layout-safe-areas.html", label: "layout safe areas" },
+        lower: { file: "layout-safe-areas.html", label: "layout safe areas" },
+        panel: { file: "layout-safe-areas.html", label: "layout safe areas" },
+        broll: { file: "contextual-broll-moments.html", label: "contextual b-roll moments" },
+        tight: { file: "destination-crop-preview.html", label: "destination crop preview" },
+        mobile: { file: "destination-crop-preview.html", label: "destination crop preview" },
+      };
+
       // The creator's resolution. "accept" keeps a deliberate choice; the rest fix it.
       const fixes = {
         keep: "Looks good",
@@ -534,6 +563,13 @@
               action: check.suggest,
               tone: "review",
             };
+            // Each framing problem is also fixable on the screen that owns it, so offer a
+            // direct route there — the connected hand-off used across the product.
+            const owner = fixScreens[frame.check];
+            if (owner) {
+              issue.fixScreen = owner.file;
+              issue.fixLabel = owner.label;
+            }
           }
 
           return {
@@ -794,6 +830,13 @@
         const span = document.createElement("span");
         span.textContent = issue.action;
         article.append(strong, span);
+        if (issue.fixScreen) {
+          const openLink = document.createElement("a");
+          openLink.className = "fix-link";
+          openLink.href = issue.fixScreen;
+          openLink.textContent = `Open ${issue.fixLabel} →`;
+          article.append(openLink);
+        }
         return article;
       }
 
