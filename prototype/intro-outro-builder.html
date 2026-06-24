@@ -1,0 +1,667 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Intro &amp; Outro Builder Prototype</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #16211f;
+        --muted: #5e6b67;
+        --line: #d9e0dd;
+        --panel: #f7faf8;
+        --accent: #136f63;
+        --warn: #a15c00;
+        --block: #a52828;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        background: #ffffff;
+      }
+
+      main {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 32px 20px 48px;
+      }
+
+      h1,
+      h2,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        font-size: 32px;
+        line-height: 1.1;
+        margin-bottom: 8px;
+      }
+
+      .lede {
+        color: var(--muted);
+        max-width: 760px;
+      }
+
+      .workspace {
+        display: grid;
+        grid-template-columns: minmax(0, 1.5fr) minmax(320px, 0.85fr);
+        gap: 24px;
+        margin-top: 28px;
+      }
+
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+        padding: 18px;
+      }
+
+      .elements {
+        display: grid;
+        gap: 12px;
+      }
+
+      .element {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 14px;
+        padding: 12px 14px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #ffffff;
+      }
+
+      .order {
+        flex: none;
+        align-self: start;
+        display: grid;
+        justify-items: center;
+        gap: 6px;
+      }
+
+      .order .num {
+        width: 30px;
+        height: 30px;
+        border-radius: 999px;
+        background: #eef4f2;
+        color: #2f4a44;
+        font-weight: 800;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .order .move {
+        display: grid;
+        gap: 4px;
+      }
+
+      .order .move button {
+        min-height: 0;
+        width: 26px;
+        height: 22px;
+        padding: 0;
+        border: 1px solid var(--line);
+        border-radius: 5px;
+        background: #ffffff;
+        color: var(--accent);
+        font-size: 10px;
+        line-height: 1;
+        cursor: pointer;
+      }
+
+      .order .move button:disabled {
+        color: #c3ccc9;
+        cursor: not-allowed;
+        background: #f4f6f5;
+      }
+
+      .fields {
+        display: grid;
+        gap: 10px;
+        align-content: start;
+      }
+
+      .fields-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      label {
+        display: grid;
+        gap: 6px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      input,
+      select {
+        width: 100%;
+        min-height: 40px;
+        border: 1px solid #bfcbc7;
+        border-radius: 6px;
+        background: #ffffff;
+        color: var(--ink);
+        font: inherit;
+        padding: 8px 10px;
+      }
+
+      .head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .head strong {
+        font-size: 14px;
+      }
+
+      .pill {
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 2px 8px;
+        background: #e7efec;
+        color: #2f4a44;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+      }
+
+      .pill.outro {
+        background: #efe7f3;
+        color: #543f63;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        border-radius: 999px;
+        padding: 0 11px;
+        font-weight: 700;
+        font-size: 13px;
+        white-space: nowrap;
+      }
+
+      .badge.ready {
+        color: #075246;
+        background: #dff5ef;
+      }
+
+      .badge.skipped {
+        color: #5e6b67;
+        background: #eceeed;
+      }
+
+      .badge.review {
+        color: #7a4400;
+        background: #fff1d6;
+      }
+
+      .status {
+        display: inline-flex;
+        align-items: center;
+        min-height: 32px;
+        border-radius: 999px;
+        padding: 0 12px;
+        font-weight: 800;
+      }
+
+      .status.ready {
+        color: #075246;
+        background: #dff5ef;
+      }
+
+      .status.review {
+        color: #7a4400;
+        background: #fff1d6;
+      }
+
+      .issues {
+        display: grid;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .issue {
+        border-left: 4px solid var(--warn);
+        border-radius: 6px;
+        background: #ffffff;
+        padding: 12px;
+      }
+
+      .issue.info {
+        border-left-color: var(--accent);
+      }
+
+      .issue strong {
+        display: block;
+        margin-bottom: 4px;
+      }
+
+      .issue span {
+        color: var(--muted);
+      }
+
+      .reels {
+        display: grid;
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+
+      .reel {
+        border: 1px solid #bfe3d7;
+        border-radius: 8px;
+        background: #eef9f4;
+        padding: 12px;
+      }
+
+      .reel strong {
+        display: block;
+        margin-bottom: 6px;
+        color: #075246;
+      }
+
+      .reel ol {
+        margin: 0;
+        padding-left: 18px;
+        display: grid;
+        gap: 3px;
+        font-size: 13px;
+      }
+
+      .reel .empty {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      button {
+        min-height: 40px;
+        border: 1px solid #0f5d53;
+        border-radius: 6px;
+        background: var(--accent);
+        color: #ffffff;
+        font: inherit;
+        font-weight: 700;
+        padding: 8px 12px;
+        cursor: pointer;
+      }
+
+      button.secondary {
+        background: #ffffff;
+        color: var(--accent);
+      }
+
+      button:disabled {
+        background: #cfe0db;
+        border-color: #cfe0db;
+        color: #6f817b;
+        cursor: not-allowed;
+      }
+
+      .summary-note {
+        color: var(--muted);
+        font-size: 13px;
+        margin: 14px 0 0;
+      }
+
+      @media (max-width: 840px) {
+        .workspace {
+          grid-template-columns: 1fr;
+        }
+
+        .fields-row {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Intro &amp; outro builder</h1>
+      <p class="lede">Build a reusable intro and outro from the pieces your show already uses &mdash; a title, a host greeting, a sponsor mention, a call to action &mdash; and arrange them in order. Add the detail each piece needs, then build the bookends for this episode.</p>
+
+      <section class="workspace" aria-label="Intro and outro builder workspace">
+        <div class="panel">
+          <h2>Intro &amp; outro pieces</h2>
+          <div class="elements" id="elements"></div>
+          <div class="actions">
+            <button type="button" id="add">Add a piece</button>
+            <button type="button" id="build">Build intro &amp; outro</button>
+            <button type="button" class="secondary" id="reset">Reset sample</button>
+          </div>
+        </div>
+
+        <aside class="panel" aria-live="polite" aria-label="Bookend summary">
+          <h2>Bookend summary</h2>
+          <div id="status" class="status ready">Ready to build</div>
+          <div id="reels" class="reels" hidden></div>
+          <div id="issues" class="issues"></div>
+          <p class="summary-note">Save these pieces and their order to your show template so every episode opens and closes the same way.</p>
+        </aside>
+      </section>
+    </main>
+
+    <script>
+      // Which bookend a piece belongs to.
+      const sections = {
+        intro: "Intro",
+        outro: "Outro",
+      };
+
+      // Reusable intro/outro pieces, and the episode-specific detail some of them need
+      // before they're ready. Readiness is derived from the detail field, not toggled.
+      const pieces = {
+        "title-card": { label: "Show title card", detail: null },
+        "host-greeting": { label: "Host greeting", detail: null },
+        "episode-teaser": { label: "Episode teaser", detail: { label: "Hook", placeholder: "What's the teaser line?" } },
+        "guest-bumper": { label: "Guest bumper", detail: { label: "Guest", placeholder: "Which guest?" } },
+        "sponsor-mention": { label: "Sponsor mention", detail: { label: "Sponsor", placeholder: "Which sponsor?" } },
+        recap: { label: "Episode recap", detail: null },
+        "call-to-action": { label: "Call to action", detail: { label: "Ask", placeholder: "Subscribe, review, link?" } },
+        "outro-music": { label: "Outro music", detail: null },
+      };
+
+      // Whether the piece is included in this episode's bookends.
+      const plans = {
+        include: "In this episode",
+        skip: "Skip this episode",
+      };
+
+      const sampleElements = [
+        { id: "e1", piece: "title-card", section: "intro", plan: "include", detail: "" },
+        { id: "e2", piece: "host-greeting", section: "intro", plan: "include", detail: "" },
+        { id: "e3", piece: "guest-bumper", section: "intro", plan: "include", detail: "" },
+        { id: "e4", piece: "sponsor-mention", section: "intro", plan: "include", detail: "Riverside" },
+        { id: "e5", piece: "call-to-action", section: "outro", plan: "include", detail: "Subscribe" },
+        { id: "e6", piece: "outro-music", section: "outro", plan: "include", detail: "" },
+      ];
+
+      let elements = structuredClone(sampleElements);
+      // Whether the bookends have been built. Any edit clears it.
+      let built = false;
+
+      const elementsElement = document.querySelector("#elements");
+      const statusElement = document.querySelector("#status");
+      const issuesElement = document.querySelector("#issues");
+      const reelsElement = document.querySelector("#reels");
+      const buildButton = document.querySelector("#build");
+
+      document.querySelector("#add").addEventListener("click", () => {
+        const next = elements.length + 1;
+        elements.push({ id: `e${next}-${elements.length}`, piece: "episode-teaser", section: "intro", plan: "include", detail: "" });
+        built = false;
+        render();
+      });
+
+      buildButton.addEventListener("click", () => {
+        if (evaluate().overall !== "ready") {
+          return;
+        }
+        built = true;
+        render();
+      });
+
+      document.querySelector("#reset").addEventListener("click", () => {
+        elements = structuredClone(sampleElements);
+        built = false;
+        render();
+      });
+
+      function moveElement(index, delta) {
+        const target = index + delta;
+        if (target < 0 || target >= elements.length) {
+          return;
+        }
+        const [moved] = elements.splice(index, 1);
+        elements.splice(target, 0, moved);
+        built = false;
+        render();
+      }
+
+      // Single source of truth: a piece is settled when skipped, ready when included and
+      // either needs no detail or has its detail filled in, and needs review when an
+      // included piece's required detail is still empty.
+      function evaluate() {
+        const results = elements.map((element) => {
+          const piece = pieces[element.piece];
+          const needs = piece && piece.detail;
+          const label = piece ? piece.label : "Piece";
+          let state;
+          let issue = null;
+          if (element.plan === "skip") {
+            state = "skipped";
+          } else if (needs && !element.detail.trim()) {
+            state = "review";
+            issue = {
+              title: `${label} needs a ${needs.label.toLowerCase()}`,
+              action: `Add the ${needs.label.toLowerCase()} for this piece, or skip it this episode.`,
+              tone: "review",
+            };
+          } else {
+            state = "ready";
+          }
+          return { id: element.id, state, issue };
+        });
+
+        const hasReview = results.some((result) => result.state === "review");
+        const overall = hasReview ? "review" : "ready";
+        return { overall, results };
+      }
+
+      function render() {
+        const evaluation = evaluate();
+        const order = { intro: 0, outro: 0 };
+        elementsElement.replaceChildren(
+          ...elements.map((element, index) => {
+            const inEpisode = element.plan !== "skip";
+            let num = null;
+            if (inEpisode) {
+              order[element.section] += 1;
+              num = order[element.section];
+            }
+            return renderElement(element, index, evaluation.results[index], num);
+          }),
+        );
+        updateSummary(evaluation);
+      }
+
+      function updateSummary(evaluation) {
+        const ready = evaluation.overall === "ready";
+        statusElement.className = `status ${built ? "ready" : evaluation.overall}`;
+        statusElement.textContent = built ? "Intro & outro built" : ready ? "Ready to build" : "Some pieces need detail";
+
+        buildButton.disabled = !ready;
+        buildButton.textContent = built ? "Rebuild with changes" : "Build intro & outro";
+
+        renderReels();
+
+        const issues = evaluation.results.map((result) => result.issue).filter(Boolean);
+        issuesElement.replaceChildren(
+          ...(issues.length
+            ? issues.map(renderIssue)
+            : [Object.assign(document.createElement("p"), { textContent: "Every piece is set. The intro and outro are ready to build." })]),
+        );
+      }
+
+      // After building, show the ordered intro and outro reels — the outcome of the pieces.
+      function renderReels() {
+        if (!built) {
+          reelsElement.hidden = true;
+          reelsElement.replaceChildren();
+          return;
+        }
+        reelsElement.hidden = false;
+        reelsElement.replaceChildren(...["intro", "outro"].map((section) => {
+          const reel = document.createElement("div");
+          reel.className = "reel";
+          const heading = document.createElement("strong");
+          heading.textContent = `${sections[section]} reel`;
+          reel.append(heading);
+          const included = elements.filter((element) => element.section === section && element.plan !== "skip");
+          if (included.length) {
+            const list = document.createElement("ol");
+            included.forEach((element) => {
+              const li = document.createElement("li");
+              li.textContent = pieces[element.piece] ? pieces[element.piece].label : "Piece";
+              list.append(li);
+            });
+            reel.append(list);
+          } else {
+            const empty = document.createElement("p");
+            empty.className = "empty";
+            empty.textContent = `No ${section} pieces in this episode.`;
+            reel.append(empty);
+          }
+          return reel;
+        }));
+      }
+
+      function badgeClass(state) {
+        if (state === "ready") {
+          return "ready";
+        }
+        if (state === "skipped") {
+          return "skipped";
+        }
+        return "review";
+      }
+
+      function badgeLabel(state) {
+        if (state === "ready") {
+          return "in episode";
+        }
+        if (state === "skipped") {
+          return "skipped";
+        }
+        return "needs detail";
+      }
+
+      function renderElement(element, index, result, num) {
+        const piece = pieces[element.piece];
+        const article = document.createElement("article");
+        article.className = "element";
+
+        const pieceOptions = Object.entries(pieces)
+          .map(([value, item]) => `<option value="${value}" ${value === element.piece ? "selected" : ""}>${item.label}</option>`)
+          .join("");
+        const sectionOptions = Object.entries(sections)
+          .map(([value, label]) => `<option value="${value}" ${value === element.section ? "selected" : ""}>${label}</option>`)
+          .join("");
+        const planOptions = Object.entries(plans)
+          .map(([value, label]) => `<option value="${value}" ${value === element.plan ? "selected" : ""}>${label}</option>`)
+          .join("");
+        const needs = piece && piece.detail;
+        const detailMarkup = needs && element.plan !== "skip"
+          ? `<label>${needs.label}<input data-field="detail" aria-label="${needs.label}" placeholder="${needs.placeholder}"></label>`
+          : "";
+
+        // The scaffold holds only controlled values (piece/section/plan keys and fixed
+        // labels, fixed states, and a fixed detail label/placeholder). The editable detail
+        // value is written via .value below, so typed text can never inject markup.
+        article.innerHTML = `
+          <div class="order">
+            <span class="num">${num === null ? "&mdash;" : num}</span>
+            <div class="move">
+              <button type="button" data-move="up" aria-label="Move piece up" ${index === 0 ? "disabled" : ""}>&#9650;</button>
+              <button type="button" data-move="down" aria-label="Move piece down" ${index === elements.length - 1 ? "disabled" : ""}>&#9660;</button>
+            </div>
+          </div>
+          <div class="fields">
+            <div class="head">
+              <strong>${piece.label}</strong>
+              <span class="pill ${element.section}">${sections[element.section]}</span>
+              <span class="badge ${badgeClass(result.state)}">${badgeLabel(result.state)}</span>
+            </div>
+            <div class="fields-row">
+              <label>Piece
+                <select data-field="piece" aria-label="Intro or outro piece">${pieceOptions}</select>
+              </label>
+              <label>Bookend
+                <select data-field="section" aria-label="Intro or outro">${sectionOptions}</select>
+              </label>
+            </div>
+            <div class="fields-row">
+              <label>This episode
+                <select data-field="plan" aria-label="Plan for this episode">${planOptions}</select>
+              </label>
+              ${detailMarkup}
+            </div>
+          </div>
+        `;
+
+        if (needs && element.plan !== "skip") {
+          article.querySelector('[data-field="detail"]').value = element.detail;
+        }
+
+        article.querySelector('[data-move="up"]').addEventListener("click", () => moveElement(index, -1));
+        article.querySelector('[data-move="down"]').addEventListener("click", () => moveElement(index, 1));
+
+        // Typing the detail updates badge/summary in place (keeps focus); selects rebuild.
+        article.addEventListener("input", (event) => onEdit(event, index, false));
+        article.addEventListener("change", (event) => onEdit(event, index, true));
+        return article;
+      }
+
+      function refreshStates() {
+        const evaluation = evaluate();
+        Array.from(elementsElement.children).forEach((card, index) => {
+          const badge = card.querySelector(".badge");
+          if (badge && evaluation.results[index]) {
+            badge.className = `badge ${badgeClass(evaluation.results[index].state)}`;
+            badge.textContent = badgeLabel(evaluation.results[index].state);
+          }
+        });
+        updateSummary(evaluation);
+      }
+
+      function onEdit(event, index, full) {
+        const field = event.target.dataset.field;
+        if (!field) {
+          return;
+        }
+        if (!full && event.target.tagName !== "INPUT") {
+          return;
+        }
+        elements[index][field] = event.target.value;
+        built = false;
+        if (full) {
+          render();
+        } else {
+          refreshStates();
+        }
+      }
+
+      function renderIssue(issue) {
+        const article = document.createElement("article");
+        article.className = `issue ${issue.tone}`;
+        const strong = document.createElement("strong");
+        strong.textContent = issue.title;
+        const span = document.createElement("span");
+        span.textContent = issue.action;
+        article.append(strong, span);
+        return article;
+      }
+
+      render();
+    </script>
+  </body>
+</html>
