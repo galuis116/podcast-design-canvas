@@ -15,6 +15,13 @@ const shellFiles = fs
   .filter((name) => name.endsWith(".html") || name.endsWith("-nav.js"))
   .map((name) => path.join(previewDir, name));
 
+// The full screen catalog at the repo root is also a preview-shell entrypoint (#581),
+// so its focusable rules must keep a visible focus ring too.
+const rootCatalog = path.join(previewDir, "..", "index.html");
+if (fs.existsSync(rootCatalog)) {
+  shellFiles.push(rootCatalog);
+}
+
 assert.ok(shellFiles.length > 0, "preview shell and path-nav files exist for focus guard");
 
 const ruleBlock = /([^{}]+)\{([^{}]*)\}/g;
