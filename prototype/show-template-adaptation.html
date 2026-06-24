@@ -229,6 +229,43 @@
         color: var(--accent);
       }
 
+      button:disabled {
+        background: #cfe0db;
+        border-color: #cfe0db;
+        color: #6f817b;
+        cursor: not-allowed;
+      }
+
+      .applied {
+        border: 1px solid #bfe3d7;
+        border-radius: 8px;
+        background: #eef9f4;
+        padding: 14px;
+        margin-bottom: 12px;
+      }
+
+      .applied strong {
+        display: block;
+        margin-bottom: 8px;
+        color: #075246;
+      }
+
+      .applied ul {
+        margin: 0;
+        padding-left: 18px;
+        display: grid;
+        gap: 4px;
+      }
+
+      .applied li {
+        color: var(--ink);
+        font-size: 13px;
+      }
+
+      .applied li span {
+        color: var(--muted);
+      }
+
       .summary-note {
         color: var(--muted);
         font-size: 13px;
@@ -256,13 +293,15 @@
           <h2>Adapting "Founders Weekly" template</h2>
           <div class="items" id="items"></div>
           <div class="actions">
-            <button type="button" id="reset">Reset sample</button>
+            <button type="button" id="apply">Apply template to this episode</button>
+            <button type="button" class="secondary" id="reset">Reset sample</button>
           </div>
         </div>
 
         <aside class="panel" aria-live="polite" aria-label="Adaptation summary">
           <h2>Adaptation summary</h2>
           <div id="status" class="status ready">Ready to apply</div>
+          <div id="applied" class="applied" hidden></div>
           <div id="issues" class="issues"></div>
           <p class="summary-note">The template keeps the show's identity. Each episode can still adjust names, topics, guests, and layout without changing past exports.</p>
         </aside>
@@ -332,12 +371,29 @@
 
       let items = structuredClone(sampleItems);
 
+      // Whether the creator has applied the resolved template to this episode. Any change
+      // to a decision clears it, since the applied outcome would no longer match.
+      let applied = false;
+
       const itemsElement = document.querySelector("#items");
       const statusElement = document.querySelector("#status");
       const issuesElement = document.querySelector("#issues");
+      const appliedElement = document.querySelector("#applied");
+      const applyButton = document.querySelector("#apply");
+
+      applyButton.addEventListener("click", () => {
+        // Apply is only enabled when every decision is resolved, so this commits the
+        // adapted template to the episode and shows the resulting outcome.
+        if (evaluate(items).overall !== "ready") {
+          return;
+        }
+        applied = true;
+        render();
+      });
 
       document.querySelector("#reset").addEventListener("click", () => {
         items = structuredClone(sampleItems);
+        applied = false;
         render();
       });
 
@@ -391,11 +447,20 @@
       }
 
       function updateSummary(evaluation) {
-        statusElement.className = `status ${evaluation.overall}`;
+        const ready = evaluation.overall === "ready";
+        statusElement.className = `status ${applied ? "ready" : evaluation.overall}`;
         const reviewCount = evaluation.results.filter((result) => result.state === "review").length;
-        statusElement.textContent = evaluation.overall === "ready"
-          ? "Ready to apply"
-          : `${reviewCount} decision${reviewCount === 1 ? "" : "s"} left`;
+        statusElement.textContent = applied
+          ? "Template applied"
+          : ready
+            ? "Ready to apply"
+            : `${reviewCount} decision${reviewCount === 1 ? "" : "s"} left`;
+
+        // The primary apply action is only enabled once every decision is resolved.
+        applyButton.disabled = !ready;
+        applyButton.textContent = applied ? "Re-apply with changes" : "Apply template to this episode";
+
+        renderApplied(evaluation);
 
         const issues = evaluation.results.map((result) => result.issue).filter(Boolean);
         issuesElement.replaceChildren(
@@ -403,6 +468,34 @@
             ? issues.map(renderIssue)
             : [Object.assign(document.createElement("p"), { textContent: "Every part is set. The template is ready to apply to this episode." })]),
         );
+      }
+
+      // After applying, show what this episode now uses for each adapted area — the
+      // outcome of the resolved choices, not just a cleared checklist.
+      function renderApplied(evaluation) {
+        if (!applied) {
+          appliedElement.hidden = true;
+          appliedElement.replaceChildren();
+          return;
+        }
+        appliedElement.hidden = false;
+        const heading = document.createElement("strong");
+        heading.textContent = 'Applied to this episode — "Founders Weekly"';
+        const list = document.createElement("ul");
+        items.forEach((item, index) => {
+          const area = areas[item.area];
+          const choice = evaluation.results[index].state;
+          const outcome = choice === "adjusted" ? "adjusted for this episode" : "using the template default";
+          const li = document.createElement("li");
+          const label = document.createElement("span");
+          // Built with textContent — area labels are controlled, but this keeps the
+          // applied panel consistent with the rest of the safe rendering.
+          li.textContent = `${area.label}: `;
+          label.textContent = outcome;
+          li.append(label);
+          list.append(li);
+        });
+        appliedElement.replaceChildren(heading, list);
       }
 
       function badgeClass(state) {
@@ -462,6 +555,8 @@
           return;
         }
         items[index][field] = event.target.value;
+        // Changing a decision invalidates a previously applied outcome.
+        applied = false;
         render();
       }
 
