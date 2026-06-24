@@ -497,4 +497,35 @@ assert.equal(
   "visuals nav merges reuse path context onto the segment-system handoff",
 );
 
+// The screen-share template fix link points at show-template-adaptation, another reuse-path
+// screen. When visuals were entered from the reuse path it should carry path=reuse too, the
+// same as the segment-system continue handoff.
+const reuseTemplateFix = renderNavFor(
+  "screen-share-moment-review.html",
+  "screen-share-moment-review",
+  false,
+  "?path=reuse&from=style",
+  ["show-template-adaptation.html"],
+);
+assert.equal(
+  linkWithText(reuseTemplateFix, "show-template-adaptation.html").href,
+  "show-template-adaptation.html?path=reuse",
+  "visuals nav carries reuse path onto the screen-share template-adaptation fix link",
+);
+
+const embeddedReuseTemplateFix = renderNavFor(
+  "screen-share-moment-review.html",
+  "screen-share-moment-review",
+  true,
+  "?path=reuse&from=style",
+  ["show-template-adaptation.html"],
+);
+const embeddedTemplateLink = linkWithText(embeddedReuseTemplateFix, "show-template-adaptation.html");
+assert.equal(
+  embeddedTemplateLink.href,
+  "../preview/app.html#show-template-adaptation?path=reuse",
+  "embedded visuals nav routes the screen-share template-adaptation fix link through the preview app with reuse path",
+);
+assert.equal(embeddedTemplateLink.target, "_top", "embedded template-adaptation fix link targets the parent app");
+
 console.log("visuals nav: contextual-visuals screens connected into one path");

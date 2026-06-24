@@ -17,14 +17,17 @@ const VISUALS_ENTRY_BACKLINKS = {
   cleanup: { href: "on-screen-correction-note.html?from=cleanup", label: "On-screen correction note" },
   style: { href: "canvas-layer-controls.html", label: "Canvas layer controls" },
 };
-const VISUALS_HANDOFF_TARGET = "show-segment-system.html";
+// Reuse-flow screens contextual visuals hand off to: the segment-system continue target
+// and the screen-share template-adaptation fix link. Both belong to the reuse guided path,
+// so they are promoted to path=reuse when visuals were entered from reuse (#583).
+const VISUALS_REUSE_HANDOFF_TARGETS = new Set(["show-segment-system", "show-template-adaptation"]);
 const VISUALS_HANDOFF_REUSE_PATH = "reuse";
 
 const PREVIEW_APP_VISUALS_TARGETS = new Set([
   screenIdFromFile(VISUALS_ENTRY_BACKLINKS.cleanup.href),
   screenIdFromFile(VISUALS_ENTRY_BACKLINKS.style.href),
   ...VISUALS_FLOW.map((step) => step.id),
-  "show-segment-system",
+  ...VISUALS_REUSE_HANDOFF_TARGETS,
 ]);
 
 // Style, publish, and ingest screens that contextual visuals prototypes hand off to
@@ -112,11 +115,12 @@ function pathQuerySuffix() {
 }
 
 function isVisualsHandoffTarget(file) {
-  return screenIdFromFile(file) === screenIdFromFile(VISUALS_HANDOFF_TARGET);
+  return VISUALS_REUSE_HANDOFF_TARGETS.has(screenIdFromFile(file));
 }
 
-// Reuse-path handoff: contextual visuals finish on show-segment-system on the reuse
-// guided path (#583), matching reuse-nav entry expectations.
+// Reuse-path handoff: contextual visuals continue to show-segment-system and can send the
+// screen-share template fix to show-template-adaptation; both sit on the reuse guided path
+// (#583), so carry path=reuse when the creator entered visuals from reuse.
 function visualsReuseHandoffHref(file) {
   if (!isVisualsHandoffTarget(file)) {
     return null;
