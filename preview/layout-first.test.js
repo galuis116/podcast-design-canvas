@@ -240,11 +240,56 @@ assert.match(
 );
 assert.equal(controller.zonesBySlot.broll.classList.contains("filled"), false, "b-roll remains empty and optional");
 
+controller.applyLayout("panel");
+assert.equal(
+  controller.zonesBySlot.host.classList.contains("filled"),
+  true,
+  "switching layouts keeps the host video when that slot still exists",
+);
+assert.equal(
+  controller.zonesBySlot.guest.classList.contains("filled"),
+  true,
+  "switching layouts keeps the guest video when that slot still exists",
+);
+assert.equal(
+  elementsById["layout-continue"].attributes["aria-disabled"],
+  "true",
+  "switching to panel re-gates continue until the new required guest slot is filled",
+);
+controller.placeVideoFile(controller.zonesBySlot["guest-b"], video("panel-guest-b.mp4"));
+assert.equal(
+  elementsById["layout-continue"].attributes["aria-disabled"],
+  "false",
+  "panel continues once the newly required guest slot is filled",
+);
+controller.applyLayout("solo");
+assert.equal(
+  controller.zonesBySlot.host.classList.contains("filled"),
+  true,
+  "switching to solo keeps the host video in the shared slot",
+);
+assert.equal(
+  controller.zonesBySlot.guest.classList.contains("filled"),
+  false,
+  "switching to solo clears the guest video because that slot is no longer visible",
+);
+assert.ok(
+  revokedUrls.includes("blob:guest.mp4"),
+  "switching away from a hidden slot revokes that slot's object URL",
+);
+assert.equal(
+  elementsById["layout-continue"].attributes["aria-disabled"],
+  "false",
+  "solo stays ready when its single required host slot was already placed",
+);
+
 // Per-slot remove: a creator can clear one wrong video without resetting the layout.
 const jsSource = fs.readFileSync(path.join(__dirname, "layout-first.js"), "utf8");
 assert.match(jsSource, /placed-remove/, "placed videos expose a per-slot remove control");
 assert.match(jsSource, /aria-label", "Remove the/, "the remove control is labelled per slot");
 
+controller.applyLayout("interview");
+controller.placeVideoFile(controller.zonesBySlot.guest, video("guest.mp4"));
 controller.removeVideo(controller.zonesBySlot.guest);
 assert.equal(
   controller.zonesBySlot.guest.classList.contains("filled"),
@@ -268,15 +313,6 @@ assert.equal(
   elementsById["layout-continue"].attributes["aria-disabled"],
   "false",
   "re-filling the removed slot restores the continue handoff",
-);
-
-controller.applyLayout("solo");
-assert.equal(controller.requiredSlots().length, 1, "solo requires only the host video");
-controller.placeVideoFile(controller.zonesBySlot.host, video("solo.mp4"));
-assert.equal(
-  elementsById["layout-continue"].attributes["aria-disabled"],
-  "false",
-  "solo continues after the host slot is filled",
 );
 
 controller.applyLayout("panel");
