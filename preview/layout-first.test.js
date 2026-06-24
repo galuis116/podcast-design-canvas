@@ -311,6 +311,16 @@ assert.equal(
   "false",
   "panel continues once the newly required guest slot is filled",
 );
+// The per-slot Remove control is named with the creator-facing slot label, so the second
+// guest reads "Remove the Guest 2 video" rather than the raw slot id "guest-b".
+const guestBRemove = controller.zonesBySlot["guest-b"]
+  .querySelector(".placed-video")
+  .children.find((child) => child.tagName === "button");
+assert.equal(
+  guestBRemove.getAttribute("aria-label"),
+  "Remove the Guest 2 video",
+  "the Guest 2 remove control uses the creator-facing slot name, not the raw slot id",
+);
 controller.applyLayout("solo");
 assert.equal(
   controller.zonesBySlot.host.classList.contains("filled"),

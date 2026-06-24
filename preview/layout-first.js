@@ -654,7 +654,9 @@
       remove.type = "button";
       remove.className = "placed-remove";
       remove.textContent = "Remove";
-      remove.setAttribute("aria-label", "Remove the " + (zone.dataset.slot || "video") + " video");
+      // Use the creator-facing slot name so the second guest reads "Remove the Guest 2 video"
+      // rather than the raw slot id ("guest-b"), matching the placed video's own label.
+      remove.setAttribute("aria-label", "Remove the " + slotName(zone) + " video");
       remove.addEventListener("click", (event) => {
         if (event && typeof event.stopPropagation === "function") {
           event.stopPropagation();
