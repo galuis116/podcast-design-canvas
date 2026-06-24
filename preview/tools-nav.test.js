@@ -16,6 +16,12 @@ new vm.Script(navScript);
 assert.ok(navScript.includes('home.href = "../preview/"'), "tools nav links back to the preview shell");
 assert.ok(!/innerHTML/.test(navScript), "tools nav builds the DOM without innerHTML");
 
+// Every secondary screen is assigned a workflow stage in the nav's stage map, so a
+// connected screen always shows where it fits (and a new screen can't be left unlabelled).
+const stageKeys = new Set(
+  [...navScript.matchAll(/"([a-z0-9-]+\.html)":\s*"/g)].map((m) => m[1]),
+);
+
 // The five core-flow screens use the richer episode-flow nav instead.
 const coreFlow = new Set([
   "source-media-health.html",
@@ -47,10 +53,21 @@ for (const file of prototypes) {
       html.includes("../preview/tools-nav.js"),
       `secondary screen links back to the shell: ${file}`,
     );
+    // ...and has a workflow stage so its nav shows where it fits.
+    assert.ok(
+      stageKeys.has(file),
+      `secondary screen has a workflow stage in tools-nav.js: ${file}`,
+    );
     secondaryCount += 1;
   }
 }
 
 assert.ok(secondaryCount > 0, "found secondary screens to check");
 
-console.log(`tools nav: ${secondaryCount} secondary screens connected back to the preview shell`);
+// No stale stage entries pointing at files that no longer exist.
+const existing = new Set(prototypes);
+for (const key of stageKeys) {
+  assert.ok(existing.has(key), `tools-nav.js stage map entry resolves to a real screen: ${key}`);
+}
+
+console.log(`tools nav: ${secondaryCount} secondary screens connected, each labelled with its workflow stage`);
