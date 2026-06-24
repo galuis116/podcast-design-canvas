@@ -242,6 +242,25 @@
         color: var(--muted);
       }
 
+      .fix-link {
+        display: inline-block;
+        margin-top: 4px;
+        color: var(--accent, #136f63);
+        font-weight: 700;
+        font-size: 13px;
+        text-decoration: none;
+      }
+
+      .fix-link:hover {
+        text-decoration: underline;
+      }
+
+      .fix-link:focus-visible {
+        text-decoration: underline;
+        outline: 2px solid var(--accent, #136f63);
+        outline-offset: 2px;
+      }
+
       .actions {
         display: flex;
         flex-wrap: wrap;
@@ -714,6 +733,17 @@
           });
           if (!issues.length) {
             issues.push(el("p", { text: "Every chapter has a title and a clean start. Ready to publish." }));
+          }
+          if (evaluation.overall === "ready") {
+            // A ready outline continues into publishing — offer a direct route to the
+            // publish checklist, where the confirmed chapters are checked off.
+            issues.push(
+              el("a", {
+                className: "fix-link",
+                text: "Continue: open the publish checklist →",
+                attrs: { href: "publish-checklist.html" },
+              })
+            );
           }
           issuesElement.replaceChildren.apply(issuesElement, issues);
         }
