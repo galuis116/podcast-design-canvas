@@ -25,4 +25,16 @@ for (const file of fixScreens) {
   assert.ok(fs.existsSync(path.join(dir, file)), `fix screen exists: ${file}`);
 }
 
-console.log(`export readiness: ${fixScreens.length} readiness areas open their owning fix screen`);
+// Each status control must carry its own accessible name. Putting aria-label on the
+// wrapping <label> does NOT name the inner <select> (a label's accessible name comes
+// from its text, not its aria-label), so the aria-label must be on the <select>.
+assert.ok(
+  /<select data-id="\$\{check\.id\}"[^>]*aria-label=/.test(html),
+  "the status select carries its own aria-label (accessible name)",
+);
+assert.ok(
+  !/<label[^>]*aria-label=/.test(html),
+  "no <label> carries an aria-label meant for its control",
+);
+
+console.log(`export readiness: ${fixScreens.length} readiness areas open their owning fix screen; status control is named`);
