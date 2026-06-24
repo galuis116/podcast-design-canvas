@@ -1,0 +1,665 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sponsor Placement Review Prototype</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #16211f;
+        --muted: #5e6b67;
+        --line: #d9e0dd;
+        --panel: #f7faf8;
+        --accent: #136f63;
+        --warn: #a15c00;
+        --block: #a52828;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        background: #ffffff;
+      }
+
+      main {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 32px 20px 48px;
+      }
+
+      h1,
+      h2,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        font-size: 32px;
+        line-height: 1.1;
+        margin-bottom: 8px;
+      }
+
+      .lede {
+        color: var(--muted);
+        max-width: 760px;
+      }
+
+      .workspace {
+        display: grid;
+        grid-template-columns: minmax(0, 1.5fr) minmax(320px, 0.85fr);
+        gap: 24px;
+        margin-top: 28px;
+      }
+
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+        padding: 18px;
+      }
+
+      .placements {
+        display: grid;
+        gap: 14px;
+      }
+
+      .placement {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 14px;
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #ffffff;
+      }
+
+      .fields {
+        display: grid;
+        gap: 10px;
+        align-content: start;
+      }
+
+      .fields-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      label {
+        display: grid;
+        gap: 6px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      input,
+      select {
+        width: 100%;
+        min-height: 40px;
+        border: 1px solid #bfcbc7;
+        border-radius: 6px;
+        background: #ffffff;
+        color: var(--ink);
+        font: inherit;
+        padding: 8px 10px;
+      }
+
+      select:disabled {
+        background: #eef2f0;
+        color: #8a948f;
+      }
+
+      .head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .head strong {
+        font-size: 15px;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        border-radius: 999px;
+        padding: 0 11px;
+        font-weight: 700;
+        font-size: 13px;
+        white-space: nowrap;
+      }
+
+      .badge.clear {
+        color: #075246;
+        background: #dff5ef;
+      }
+
+      .badge.fixed {
+        color: #2a4c8a;
+        background: #e2ebfb;
+      }
+
+      .badge.accepted {
+        color: #5e6b67;
+        background: #eceeed;
+      }
+
+      .badge.review {
+        color: #7a4400;
+        background: #fff1d6;
+      }
+
+      .badge.blocked {
+        color: #8b1e1e;
+        background: #ffe0e0;
+      }
+
+      .status {
+        display: inline-flex;
+        align-items: center;
+        min-height: 32px;
+        border-radius: 999px;
+        padding: 0 12px;
+        font-weight: 800;
+      }
+
+      .status.ready {
+        color: #075246;
+        background: #dff5ef;
+      }
+
+      .status.review {
+        color: #7a4400;
+        background: #fff1d6;
+      }
+
+      .status.blocked {
+        color: #8b1e1e;
+        background: #ffe0e0;
+      }
+
+      .frame {
+        position: relative;
+        width: 128px;
+        aspect-ratio: 16 / 9;
+        flex: none;
+        align-self: start;
+        border-radius: 6px;
+        overflow: hidden;
+        background: linear-gradient(160deg, #6db5a8, #1d554d);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+      }
+
+      .face {
+        position: absolute;
+        top: 18%;
+        left: 50%;
+        width: 36%;
+        aspect-ratio: 1;
+        transform: translateX(-50%);
+        border-radius: 50%;
+        background: #e8f4f1;
+      }
+
+      .mark {
+        position: absolute;
+        right: 6%;
+        bottom: 8%;
+        width: 30%;
+        height: 26%;
+        border-radius: 4px;
+        background: #f4d35e;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+      }
+
+      .frame.face-clash .mark {
+        right: auto;
+        left: 50%;
+        top: 18%;
+        bottom: auto;
+        transform: translateX(-50%);
+        width: 34%;
+        height: 34%;
+        border-radius: 50%;
+      }
+
+      .frame.lower-clash .mark {
+        left: 8%;
+        right: 8%;
+        bottom: 8%;
+        width: auto;
+        height: 22%;
+      }
+
+      .frame.faint .mark {
+        opacity: 0.32;
+      }
+
+      .frame.no-disclosure .mark::after {
+        content: "!";
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        color: #8b1e1e;
+      }
+
+      .issues {
+        display: grid;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .issue {
+        border-left: 4px solid var(--warn);
+        border-radius: 6px;
+        background: #ffffff;
+        padding: 12px;
+      }
+
+      .issue.blocker {
+        border-left-color: var(--block);
+      }
+
+      .issue.info {
+        border-left-color: var(--accent);
+      }
+
+      .issue strong {
+        display: block;
+        margin-bottom: 4px;
+      }
+
+      .issue span {
+        color: var(--muted);
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      button {
+        min-height: 40px;
+        border: 1px solid #0f5d53;
+        border-radius: 6px;
+        background: var(--accent);
+        color: #ffffff;
+        font: inherit;
+        font-weight: 700;
+        padding: 8px 12px;
+        cursor: pointer;
+      }
+
+      button.secondary {
+        background: #ffffff;
+        color: var(--accent);
+      }
+
+      .summary-note {
+        color: var(--muted);
+        font-size: 13px;
+        margin: 14px 0 0;
+      }
+
+      @media (max-width: 840px) {
+        .workspace {
+          grid-template-columns: 1fr;
+        }
+
+        .placement {
+          grid-template-columns: 1fr;
+        }
+
+        .fields-row {
+          grid-template-columns: 1fr;
+        }
+
+        .frame {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Sponsor placement review</h1>
+      <p class="lede">Place sponsor marks and disclosures tastefully and preview them on the real episode frame &mdash; without disrupting the conversation. We flag what would hurt the finished video, and a required disclosure always has to be present before export.</p>
+
+      <section class="workspace" aria-label="Sponsor placement review workspace">
+        <div class="panel">
+          <h2>Sponsor placements</h2>
+          <div class="placements" id="placements"></div>
+          <div class="actions">
+            <button type="button" id="addPlacement">Add a placement</button>
+            <button type="button" class="secondary" id="reset">Reset sample</button>
+          </div>
+        </div>
+
+        <aside class="panel" aria-live="polite" aria-label="Sponsor review summary">
+          <h2>Sponsor review summary</h2>
+          <div id="status" class="status ready">Sponsors ready</div>
+          <div id="issues" class="issues"></div>
+          <p class="summary-note">Tasteful placements you accept on purpose still export. A missing required disclosure is the one thing we won't let ship.</p>
+        </aside>
+      </section>
+    </main>
+
+    <script>
+      // Podcast-appropriate placement spots.
+      const spots = {
+        "lower-corner": "Lower-corner mark",
+        "title-card": "Title card mention",
+        "chapter-slate": "Chapter intro slate",
+        "host-read": "Host-read visual support",
+        "end-card": "End-card acknowledgement",
+        "description": "Description reminder",
+      };
+
+      // What the conflict check found. "preview" styles the sample frame, "fixes" lists
+      // only the resolutions that fit, and "required" marks a problem that must be fixed
+      // (a missing disclosure can't simply be accepted).
+      const checks = {
+        clear: { label: "No conflict", preview: "", fixes: ["keep"] },
+        "covers-face": {
+          label: "Mark covers a face",
+          preview: "face-clash",
+          fixes: ["review", "move", "reduce", "accept"],
+          title: (name) => `${name}'s mark covers a speaker's face`,
+          suggest: "Move the mark to a safe corner, reduce its strength, or accept it if it reads fine.",
+        },
+        "lower-clash": {
+          label: "Clashes with the lower-third",
+          preview: "lower-clash",
+          fixes: ["review", "move", "reduce", "accept"],
+          title: (name) => `${name}'s mark clashes with the lower-third`,
+          suggest: "Move the mark, lower its strength, or accept the overlap.",
+        },
+        "missing-disclosure": {
+          label: "Required disclosure missing",
+          preview: "no-disclosure",
+          required: true,
+          fixes: ["review", "add"],
+          title: (name) => `${name} is missing its required disclosure`,
+          suggest: "Add the disclosure text before export — this can't ship without it.",
+        },
+        sensitive: {
+          label: "Lands on a sensitive moment",
+          preview: "",
+          fixes: ["review", "reschedule", "remove", "accept"],
+          title: (name) => `${name} appears during an unrelated sensitive moment`,
+          suggest: "Move the placement to the sponsor read, remove it here, or accept it.",
+        },
+        "low-readability": {
+          label: "Hard to read",
+          preview: "faint",
+          fixes: ["review", "swap", "reduce", "accept"],
+          title: (name) => `${name}'s mark doesn't meet readability or contrast`,
+          suggest: "Swap in a clearer asset, adjust its strength, or accept it.",
+        },
+      };
+
+      // The creator's resolution. "accept" keeps a deliberate placement; "add" supplies
+      // the missing disclosure; the rest adjust the placement.
+      const fixes = {
+        keep: "Looks good",
+        review: "Decide later",
+        move: "Move the mark",
+        reduce: "Lower the strength",
+        swap: "Swap the asset",
+        reschedule: "Move to the sponsor read",
+        remove: "Remove from here",
+        add: "Add the disclosure",
+        accept: "Keep it on purpose",
+      };
+
+      const samplePlacements = [
+        { id: "s1", name: "Riverside", spot: "lower-corner", check: "clear", fix: "keep" },
+        { id: "s2", name: "Acme Mics", spot: "host-read", check: "covers-face", fix: "review" },
+        { id: "s3", name: "BrightVPN", spot: "end-card", check: "missing-disclosure", fix: "review" },
+      ];
+
+      let placements = structuredClone(samplePlacements);
+
+      const placementsElement = document.querySelector("#placements");
+      const statusElement = document.querySelector("#status");
+      const issuesElement = document.querySelector("#issues");
+
+      document.querySelector("#addPlacement").addEventListener("click", () => {
+        const next = placements.length + 1;
+        placements.push({ id: `s${next}-${placements.length}`, name: "New sponsor", spot: "lower-corner", check: "covers-face", fix: "review" });
+        render();
+      });
+
+      document.querySelector("#reset").addEventListener("click", () => {
+        placements = structuredClone(samplePlacements);
+        render();
+      });
+
+      // Single source of truth: map each placement's conflict check + the creator's fix
+      // to a review state and a plain-language issue. A missing required disclosure stays
+      // a hard blocker until it is added; everything else can be accepted on purpose.
+      function evaluate(list) {
+        const results = list.map((placement) => {
+          const check = checks[placement.check];
+          // Honour only a fix the check offers, so a stale value can never act as an
+          // option the UI would not show for this placement.
+          const allowed = check.fixes;
+          const fix = allowed.includes(placement.fix) ? placement.fix : (placement.check === "clear" ? "keep" : "review");
+          let state;
+          let issue = null;
+
+          if (placement.check === "clear") {
+            state = "clear";
+          } else if (check.required && fix !== "add") {
+            state = "blocked";
+            issue = {
+              title: check.title(placement.name || "This sponsor"),
+              action: check.suggest,
+              tone: "blocker",
+            };
+          } else if (fix === "accept") {
+            state = "accepted";
+            issue = {
+              title: `${placement.name || "This sponsor"}: kept on purpose`,
+              action: "Accepted — it stays in the export as placed.",
+              tone: "info",
+            };
+          } else if (fix !== "review") {
+            state = "fixed";
+            issue = {
+              title: `${placement.name || "This sponsor"}: ${fixes[fix].toLowerCase()}`,
+              action: "Resolved for the finished episode.",
+              tone: "info",
+            };
+          } else {
+            state = "review";
+            issue = {
+              title: check.title(placement.name || "This sponsor"),
+              action: check.suggest,
+              tone: "review",
+            };
+          }
+
+          return { id: placement.id, state, issue };
+        });
+
+        const hasBlock = results.some((result) => result.state === "blocked");
+        const hasReview = results.some((result) => result.state === "review");
+        const overall = hasBlock ? "blocked" : hasReview ? "review" : "ready";
+        return { overall, results };
+      }
+
+      // Full rebuild: used on load, add, reset, and select changes (selects don't hold
+      // a caret, so replacing them is safe).
+      function render() {
+        const evaluation = evaluate(placements);
+        placementsElement.replaceChildren(
+          ...placements.map((placement, index) => renderPlacement(placement, index, evaluation.results[index])),
+        );
+        updateSummary(evaluation);
+      }
+
+      function updateSummary(evaluation) {
+        statusElement.className = `status ${evaluation.overall}`;
+        statusElement.textContent = evaluation.overall === "ready"
+          ? "Sponsors ready"
+          : evaluation.overall === "blocked"
+            ? "Add a required disclosure"
+            : "Placements to review";
+
+        const issues = evaluation.results.map((result) => result.issue).filter(Boolean);
+        issuesElement.replaceChildren(
+          ...(issues.length
+            ? issues.map(renderIssue)
+            : [Object.assign(document.createElement("p"), { textContent: "Every sponsor placement is settled and ready for export." })]),
+        );
+      }
+
+      // Light update: used while typing a sponsor name. Refreshes each card's badge and
+      // the summary in place, without replacing the input the creator is typing in.
+      function refreshStates() {
+        const evaluation = evaluate(placements);
+        Array.from(placementsElement.children).forEach((card, index) => {
+          const badge = card.querySelector(".badge");
+          if (badge && evaluation.results[index]) {
+            badge.className = `badge ${badgeClass(evaluation.results[index].state)}`;
+            badge.textContent = badgeLabel(evaluation.results[index].state);
+          }
+        });
+        updateSummary(evaluation);
+      }
+
+      function badgeClass(state) {
+        if (state === "clear") {
+          return "clear";
+        }
+        if (state === "fixed") {
+          return "fixed";
+        }
+        if (state === "accepted") {
+          return "accepted";
+        }
+        if (state === "blocked") {
+          return "blocked";
+        }
+        return "review";
+      }
+
+      function badgeLabel(state) {
+        return state === "review" ? "needs review" : state;
+      }
+
+      function renderPlacement(placement, index, result) {
+        const check = checks[placement.check];
+        const article = document.createElement("article");
+        article.className = "placement";
+
+        const spotOptions = Object.entries(spots)
+          .map(([value, label]) => `<option value="${value}" ${value === placement.spot ? "selected" : ""}>${label}</option>`)
+          .join("");
+        const checkOptions = Object.entries(checks)
+          .map(([value, item]) => `<option value="${value}" ${value === placement.check ? "selected" : ""}>${item.label}</option>`)
+          .join("");
+        const allowed = check.fixes;
+        const fixOptions = allowed
+          .map((value) => `<option value="${value}" ${value === placement.fix ? "selected" : ""}>${fixes[value]}</option>`)
+          .join("");
+
+        // The scaffold holds only controlled values (spot/check/fix keys and their fixed
+        // labels, fixed states). The editable sponsor name is written via .value and
+        // textContent below, so a typed name can never inject markup into the page.
+        article.innerHTML = `
+          <div class="frame ${check.preview}">
+            <span class="face"></span>
+            <span class="mark"></span>
+          </div>
+          <div class="fields">
+            <div class="head">
+              <strong data-name></strong>
+              <span class="badge ${badgeClass(result.state)}">${badgeLabel(result.state)}</span>
+            </div>
+            <label>Sponsor name<input data-field="name" aria-label="Sponsor name"></label>
+            <div class="fields-row">
+              <label>Placement
+                <select data-field="spot" aria-label="Placement spot">${spotOptions}</select>
+              </label>
+              <label>What we found
+                <select data-field="check" aria-label="Detected conflict">${checkOptions}</select>
+              </label>
+            </div>
+            <label>What to do
+              <select data-field="fix" aria-label="How to resolve it" ${allowed.length <= 1 ? "disabled" : ""}>${fixOptions}</select>
+            </label>
+          </div>
+        `;
+
+        article.querySelector("[data-name]").textContent = placement.name;
+        article.querySelector('[data-field="name"]').value = placement.name;
+
+        // Text fields update live on input but only refresh badges/summary, so the field
+        // keeps focus. Selects re-render fully on change (safe — no caret).
+        article.addEventListener("input", (event) => onEdit(event, index, false));
+        article.addEventListener("change", (event) => onEdit(event, index, true));
+        return article;
+      }
+
+      function onEdit(event, index, full) {
+        const field = event.target.dataset.field;
+        if (!field) {
+          return;
+        }
+        // Selects also emit "input" in some browsers; handle them only on change (full
+        // rebuild) so a text field's input never triggers a rebuild that drops its caret.
+        if (!full && event.target.tagName !== "INPUT") {
+          return;
+        }
+        const placement = placements[index];
+        placement[field] = event.target.value;
+
+        // When the detected conflict changes, drop any fix the new check does not offer.
+        if (field === "check" && !checks[placement.check].fixes.includes(placement.fix)) {
+          placement.fix = placement.check === "clear" ? "keep" : "review";
+        }
+
+        if (full) {
+          render();
+        } else {
+          const card = placementsElement.children[index];
+          if (card) {
+            // Keep the editable name's heading in sync via textContent, never innerHTML.
+            card.querySelector("[data-name]").textContent = placement.name;
+          }
+          refreshStates();
+        }
+      }
+
+      function renderIssue(issue) {
+        const article = document.createElement("article");
+        article.className = `issue ${issue.tone}`;
+        // issue.title and issue.action embed the editable sponsor name, so build them
+        // with textContent rather than innerHTML.
+        const strong = document.createElement("strong");
+        strong.textContent = issue.title;
+        const span = document.createElement("span");
+        span.textContent = issue.action;
+        article.append(strong, span);
+        return article;
+      }
+
+      render();
+    </script>
+  </body>
+</html>
