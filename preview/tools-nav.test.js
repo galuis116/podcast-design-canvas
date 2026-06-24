@@ -49,6 +49,12 @@ const styleFlow = new Set([
   "preset-comparison-preview.html",
 ]);
 
+const visualsFlow = new Set([
+  "contextual-broll-moments.html",
+  "contextual-title-cards.html",
+  "sensitive-moment-review.html",
+]);
+
 const prototypes = fs
   .readdirSync(path.join(root, "prototype"))
   .filter((name) => name.endsWith(".html"));
@@ -91,6 +97,15 @@ for (const file of prototypes) {
     assert.ok(
       !html.includes("../preview/tools-nav.js"),
       `style screen does not double up with tools nav: ${file}`,
+    );
+  } else if (visualsFlow.has(file)) {
+    assert.ok(
+      html.includes("../preview/visuals-nav.js"),
+      `visuals screen uses visuals navigation: ${file}`,
+    );
+    assert.ok(
+      !html.includes("../preview/tools-nav.js"),
+      `visuals screen does not double up with tools nav: ${file}`,
     );
   } else {
     // Every secondary screen links back to the shell.
