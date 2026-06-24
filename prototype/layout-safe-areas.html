@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Layout Safe Areas Prototype</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #16211f;
+        --muted: #5e6b67;
+        --line: #d9e0dd;
+        --panel: #f7faf8;
+        --accent: #136f63;
+        --warn: #a15c00;
+        --block: #a52828;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        background: #ffffff;
+      }
+
+      main {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 32px 20px 48px;
+      }
+
+      h1,
+      h2,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        font-size: 32px;
+        line-height: 1.1;
+        margin-bottom: 8px;
+      }
+
+      .lede {
+        color: var(--muted);
+        max-width: 760px;
+      }
+
+      .workspace {
+        display: grid;
+        grid-template-columns: minmax(0, 1.5fr) minmax(320px, 0.85fr);
+        gap: 24px;
+        margin-top: 28px;
+      }
+
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+        padding: 18px;
+      }
+
+      .rows {
+        display: grid;
+        gap: 14px;
+      }
+
+      .row {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 14px;
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #ffffff;
+      }
+
+      .fields {
+        display: grid;
+        gap: 10px;
+        align-content: start;
+      }
+
+      .fields-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      label {
+        display: grid;
+        gap: 6px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      select {
+        width: 100%;
+        min-height: 40px;
+        border: 1px solid #bfcbc7;
+        border-radius: 6px;
+        background: #ffffff;
+        color: var(--ink);
+        font: inherit;
+        padding: 8px 10px;
+      }
+
+      select:disabled {
+        background: #eef2f0;
+        color: #8a948f;
+      }
+
+      .head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .head strong {
+        font-size: 15px;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        border-radius: 999px;
+        padding: 0 11px;
+        font-weight: 700;
+        font-size: 13px;
+        white-space: nowrap;
+      }
+
+      .badge.clear {
+        color: #075246;
+        background: #dff5ef;
+      }
+
+      .badge.fixed {
+        color: #2a4c8a;
+        background: #e2ebfb;
+      }
+
+      .badge.accepted {
+        color: #5e6b67;
+        background: #eceeed;
+      }
+
+      .badge.review {
+        color: #7a4400;
+        background: #fff1d6;
+      }
+
+      .status {
+        display: inline-flex;
+        align-items: center;
+        min-height: 32px;
+        border-radius: 999px;
+        padding: 0 12px;
+        font-weight: 800;
+      }
+
+      .status.ready {
+        color: #075246;
+        background: #dff5ef;
+      }
+
+      .status.review {
+        color: #7a4400;
+        background: #fff1d6;
+      }
+
+      .frame {
+        position: relative;
+        width: 128px;
+        aspect-ratio: 16 / 9;
+        flex: none;
+        align-self: start;
+        border-radius: 6px;
+        overflow: hidden;
+        background: linear-gradient(160deg, #6db5a8, #1d554d);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+      }
+
+      .safe {
+        position: absolute;
+        inset: 8%;
+        border: 1px dashed rgba(255, 255, 255, 0.5);
+        border-radius: 4px;
+      }
+
+      .face {
+        position: absolute;
+        top: 16%;
+        left: 50%;
+        width: 34%;
+        aspect-ratio: 1;
+        transform: translateX(-50%);
+        border-radius: 50%;
+        background: #e8f4f1;
+      }
+
+      .el {
+        position: absolute;
+        border-radius: 3px;
+        background: #f4d35e;
+      }
+
+      .el.ok {
+        left: 12%;
+        right: 12%;
+        bottom: 12%;
+        height: 18%;
+        background: rgba(255, 255, 255, 0.85);
+      }
+
+      .el.face {
+        top: 18%;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 32%;
+        height: 32%;
+        border-radius: 50%;
+      }
+
+      .el.overlap {
+        left: 10%;
+        right: 10%;
+        bottom: 10%;
+        height: 30%;
+        background: rgba(255, 255, 255, 0.85);
+        box-shadow: 0 0 0 2px rgba(165, 40, 40, 0.6);
+      }
+
+      .el.outside {
+        right: -6%;
+        bottom: 14%;
+        width: 26%;
+        height: 22%;
+      }
+
+      .el.watermark {
+        left: 12%;
+        right: 12%;
+        bottom: 12%;
+        height: 18%;
+        background: rgba(255, 255, 255, 0.5);
+        filter: blur(0.6px);
+      }
+
+      .issues {
+        display: grid;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .issue {
+        border-left: 4px solid var(--warn);
+        border-radius: 6px;
+        background: #ffffff;
+        padding: 12px;
+      }
+
+      .issue.info {
+        border-left-color: var(--accent);
+      }
+
+      .issue strong {
+        display: block;
+        margin-bottom: 4px;
+      }
+
+      .issue span {
+        color: var(--muted);
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      button {
+        min-height: 40px;
+        border: 1px solid #0f5d53;
+        border-radius: 6px;
+        background: var(--accent);
+        color: #ffffff;
+        font: inherit;
+        font-weight: 700;
+        padding: 8px 12px;
+        cursor: pointer;
+      }
+
+      button.secondary {
+        background: #ffffff;
+        color: var(--accent);
+      }
+
+      .summary-note {
+        color: var(--muted);
+        font-size: 13px;
+        margin: 14px 0 0;
+      }
+
+      @media (max-width: 840px) {
+        .workspace {
+          grid-template-columns: 1fr;
+        }
+
+        .row {
+          grid-template-columns: 1fr;
+        }
+
+        .fields-row {
+          grid-template-columns: 1fr;
+        }
+
+        .frame {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Layout safe areas</h1>
+      <p class="lede">Keep captions, lower-thirds, logos, and sponsor marks where viewers can actually read them. We check each element against the safe area for the chosen destination and flag overlaps that would hurt the finished video &mdash; deliberate choices are fine.</p>
+
+      <section class="workspace" aria-label="Layout safe areas workspace">
+        <div class="panel">
+          <h2>Layout elements</h2>
+          <div class="rows" id="rows"></div>
+          <div class="actions">
+            <button type="button" id="addRow">Add an element</button>
+            <button type="button" class="secondary" id="reset">Reset sample</button>
+          </div>
+        </div>
+
+        <aside class="panel" aria-live="polite" aria-label="Safe area summary">
+          <h2>Safe area summary</h2>
+          <div id="status" class="status ready">Layout is safe</div>
+          <div id="issues" class="issues"></div>
+          <p class="summary-note">Each element re-checks against the real episode and destination. An overlap you accept on purpose still exports.</p>
+        </aside>
+      </section>
+    </main>
+
+    <script>
+      // The layout elements we place in a podcast frame.
+      const elements = {
+        caption: "Captions",
+        "lower-third": "Lower-third",
+        logo: "Show logo",
+        sponsor: "Sponsor mark",
+        title: "Title card",
+        broll: "B-roll zone",
+      };
+
+      // What the safe-area check found. "preview" styles the sample frame, and "fixes"
+      // lists only the resolutions that fit the conflict.
+      const checks = {
+        clear: { label: "Inside the safe area", preview: "ok", fixes: ["keep"] },
+        "face-area": {
+          label: "Enters the speaker face area",
+          preview: "face",
+          fixes: ["review", "move", "switch", "accept"],
+          title: (el) => `${el} sits over the speaker's face`,
+          suggest: "Move it out of the face area, switch to a roomier layout, or accept it.",
+        },
+        overlap: {
+          label: "Overlaps another element",
+          preview: "overlap",
+          fixes: ["review", "move", "switch", "accept"],
+          title: (el) => `${el} overlaps another element`,
+          suggest: "Move it to a clear zone, switch the layout, or accept the overlap.",
+        },
+        "outside-crop": {
+          label: "Outside the destination crop",
+          preview: "outside",
+          fixes: ["review", "move", "switch", "accept"],
+          title: (el) => `${el} falls outside the destination crop`,
+          suggest: "Pull it inside the safe area, switch the crop layout, or accept it.",
+        },
+        watermark: {
+          label: "Sits under the review watermark",
+          preview: "watermark",
+          fixes: ["review", "move", "accept"],
+          title: (el) => `${el} sits under the review watermark`,
+          suggest: "Move it clear of the watermark, or accept it for the review copy.",
+        },
+        unreadable: {
+          label: "Too small to read",
+          preview: "ok",
+          fixes: ["review", "resize", "switch", "accept"],
+          title: (el) => `${el} is too small to read at this size`,
+          suggest: "Increase its size, switch to a simpler layout, or accept it.",
+        },
+      };
+
+      // The creator's resolution. "accept" keeps a deliberate placement; the rest fix it.
+      const fixes = {
+        keep: "Looks good",
+        review: "Decide later",
+        move: "Move to a safe zone",
+        resize: "Increase the size",
+        switch: "Switch the layout",
+        accept: "Keep it on purpose",
+      };
+
+      const sampleRows = [
+        { id: "l1", element: "caption", check: "clear", fix: "keep" },
+        { id: "l2", element: "sponsor", check: "face-area", fix: "review" },
+        { id: "l3", element: "logo", check: "outside-crop", fix: "accept" },
+      ];
+
+      let rows = structuredClone(sampleRows);
+
+      const rowsElement = document.querySelector("#rows");
+      const statusElement = document.querySelector("#status");
+      const issuesElement = document.querySelector("#issues");
+
+      document.querySelector("#addRow").addEventListener("click", () => {
+        const next = rows.length + 1;
+        rows.push({ id: `l${next}-${rows.length}`, element: "lower-third", check: "overlap", fix: "review" });
+        render();
+      });
+
+      document.querySelector("#reset").addEventListener("click", () => {
+        rows = structuredClone(sampleRows);
+        render();
+      });
+
+      // Single source of truth: map each element's safe-area check + the creator's fix
+      // to a review state and a plain-language issue. Accepting a deliberate overlap is
+      // always valid and never blocks export.
+      function evaluate(list) {
+        const results = list.map((row) => {
+          const check = checks[row.check];
+          const elementLabel = elements[row.element] || "This element";
+          // Honour only a fix the check offers, so a stale value can never act as an
+          // option the UI would not show for this element.
+          const allowed = check.fixes;
+          const fix = allowed.includes(row.fix) ? row.fix : (row.check === "clear" ? "keep" : "review");
+          let state;
+          let issue = null;
+
+          if (row.check === "clear") {
+            state = "clear";
+          } else if (fix === "accept") {
+            state = "accepted";
+            issue = {
+              title: `${elementLabel}: kept on purpose`,
+              action: "Accepted — it stays as placed in the export.",
+              tone: "info",
+            };
+          } else if (fix !== "review") {
+            state = "fixed";
+            issue = {
+              title: `${elementLabel}: ${fixes[fix].toLowerCase()}`,
+              action: "Resolved for the finished episode.",
+              tone: "info",
+            };
+          } else {
+            state = "review";
+            issue = {
+              title: check.title(elementLabel),
+              action: check.suggest,
+              tone: "review",
+            };
+          }
+
+          return { id: row.id, state, issue };
+        });
+
+        const hasReview = results.some((result) => result.state === "review");
+        const overall = hasReview ? "review" : "ready";
+        return { overall, results };
+      }
+
+      // Full rebuild. Every control here is a <select>, so there is no text caret to
+      // preserve and a full re-render on change is always safe.
+      function render() {
+        const evaluation = evaluate(rows);
+        rowsElement.replaceChildren(
+          ...rows.map((row, index) => renderRow(row, index, evaluation.results[index])),
+        );
+        updateSummary(evaluation);
+      }
+
+      function updateSummary(evaluation) {
+        statusElement.className = `status ${evaluation.overall}`;
+        statusElement.textContent = evaluation.overall === "ready" ? "Layout is safe" : "Elements to review";
+
+        const issues = evaluation.results.map((result) => result.issue).filter(Boolean);
+        issuesElement.replaceChildren(
+          ...(issues.length
+            ? issues.map(renderIssue)
+            : [Object.assign(document.createElement("p"), { textContent: "Every element is inside its safe area and ready for export." })]),
+        );
+      }
+
+      function badgeClass(state) {
+        if (state === "clear") {
+          return "clear";
+        }
+        if (state === "fixed") {
+          return "fixed";
+        }
+        if (state === "accepted") {
+          return "accepted";
+        }
+        return "review";
+      }
+
+      function badgeLabel(state) {
+        return state === "review" ? "needs review" : state;
+      }
+
+      function renderRow(row, index, result) {
+        const check = checks[row.check];
+        const article = document.createElement("article");
+        article.className = "row";
+
+        const elementOptions = Object.entries(elements)
+          .map(([value, label]) => `<option value="${value}" ${value === row.element ? "selected" : ""}>${label}</option>`)
+          .join("");
+        const checkOptions = Object.entries(checks)
+          .map(([value, item]) => `<option value="${value}" ${value === row.check ? "selected" : ""}>${item.label}</option>`)
+          .join("");
+        const allowed = check.fixes;
+        const fixOptions = allowed
+          .map((value) => `<option value="${value}" ${value === row.fix ? "selected" : ""}>${fixes[value]}</option>`)
+          .join("");
+
+        // Every value here is a controlled key or its fixed label, and there is no
+        // user-editable free text in this prototype, so the scaffold is safe to build
+        // with innerHTML.
+        article.innerHTML = `
+          <div class="frame">
+            <span class="safe"></span>
+            <span class="face"></span>
+            <span class="el ${check.preview}"></span>
+          </div>
+          <div class="fields">
+            <div class="head">
+              <strong>${elements[row.element]}</strong>
+              <span class="badge ${badgeClass(result.state)}">${badgeLabel(result.state)}</span>
+            </div>
+            <div class="fields-row">
+              <label>Element
+                <select data-field="element" aria-label="Layout element">${elementOptions}</select>
+              </label>
+              <label>What we found
+                <select data-field="check" aria-label="Safe area check">${checkOptions}</select>
+              </label>
+            </div>
+            <label>What to do
+              <select data-field="fix" aria-label="How to resolve it" ${allowed.length <= 1 ? "disabled" : ""}>${fixOptions}</select>
+            </label>
+          </div>
+        `;
+
+        article.addEventListener("change", (event) => onChange(event, index));
+        return article;
+      }
+
+      function onChange(event, index) {
+        const field = event.target.dataset.field;
+        if (!field) {
+          return;
+        }
+        const row = rows[index];
+        row[field] = event.target.value;
+
+        // When the detected check changes, drop any fix the new check does not offer so
+        // the dropdown never keeps a stale, non-working action.
+        if (field === "check" && !checks[row.check].fixes.includes(row.fix)) {
+          row.fix = row.check === "clear" ? "keep" : "review";
+        }
+        render();
+      }
+
+      function renderIssue(issue) {
+        const article = document.createElement("article");
+        article.className = `issue ${issue.tone}`;
+        const strong = document.createElement("strong");
+        strong.textContent = issue.title;
+        const span = document.createElement("span");
+        span.textContent = issue.action;
+        article.append(strong, span);
+        return article;
+      }
+
+      render();
+    </script>
+  </body>
+</html>
