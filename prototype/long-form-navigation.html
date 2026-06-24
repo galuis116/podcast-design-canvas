@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Long-Form Navigation Prototype</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #16211f;
+        --muted: #5e6b67;
+        --line: #d9e0dd;
+        --panel: #f7faf8;
+        --accent: #136f63;
+        --warn: #a15c00;
+        --block: #a52828;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        background: #ffffff;
+      }
+
+      main {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 32px 20px 48px;
+      }
+
+      h1,
+      h2,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        font-size: 32px;
+        line-height: 1.1;
+        margin-bottom: 8px;
+      }
+
+      .lede {
+        color: var(--muted);
+        max-width: 760px;
+      }
+
+      .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: end;
+        gap: 16px;
+        margin-top: 22px;
+      }
+
+      label {
+        display: grid;
+        gap: 6px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      select {
+        min-height: 40px;
+        border: 1px solid #bfcbc7;
+        border-radius: 6px;
+        background: #ffffff;
+        color: var(--ink);
+        font: inherit;
+        padding: 8px 10px;
+      }
+
+      .workspace {
+        display: grid;
+        grid-template-columns: minmax(0, 1.5fr) minmax(300px, 0.8fr);
+        gap: 24px;
+        margin-top: 18px;
+      }
+
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+        padding: 18px;
+      }
+
+      .moments {
+        display: grid;
+        gap: 10px;
+      }
+
+      .moment {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 12px;
+        padding: 11px 14px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #ffffff;
+      }
+
+      .time {
+        font-variant-numeric: tabular-nums;
+        font-weight: 700;
+        font-size: 13px;
+        color: #2f4a44;
+      }
+
+      .lane {
+        display: inline-block;
+        margin-top: 3px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 1px 8px;
+        background: #e7efec;
+        color: #2f4a44;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+      }
+
+      .reason {
+        font-size: 14px;
+      }
+
+      .moment select {
+        min-width: 140px;
+      }
+
+      .moment.handled {
+        opacity: 0.6;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        min-height: 26px;
+        border-radius: 999px;
+        padding: 0 10px;
+        font-weight: 700;
+        font-size: 12px;
+      }
+
+      .badge.attention {
+        color: #7a4400;
+        background: #fff1d6;
+      }
+
+      .badge.handled {
+        color: #075246;
+        background: #dff5ef;
+      }
+
+      .badge.snoozed {
+        color: #5e6b67;
+        background: #eceeed;
+      }
+
+      .status {
+        display: inline-flex;
+        align-items: center;
+        min-height: 32px;
+        border-radius: 999px;
+        padding: 0 12px;
+        font-weight: 800;
+      }
+
+      .status.ready {
+        color: #075246;
+        background: #dff5ef;
+      }
+
+      .status.review {
+        color: #7a4400;
+        background: #fff1d6;
+      }
+
+      .lanes {
+        display: grid;
+        gap: 8px;
+        margin-top: 12px;
+      }
+
+      .lane-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+        padding: 6px 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .lane-row span {
+        color: var(--muted);
+      }
+
+      .summary-note {
+        color: var(--muted);
+        font-size: 13px;
+        margin: 14px 0 0;
+      }
+
+      .actions {
+        margin-top: 16px;
+      }
+
+      button.secondary {
+        min-height: 40px;
+        border: 1px solid #0f5d53;
+        border-radius: 6px;
+        background: #ffffff;
+        color: var(--accent);
+        font: inherit;
+        font-weight: 700;
+        padding: 8px 12px;
+        cursor: pointer;
+      }
+
+      @media (max-width: 840px) {
+        .workspace {
+          grid-template-columns: 1fr;
+        }
+
+        .moment {
+          grid-template-columns: 1fr;
+          align-items: start;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Long-form navigation</h1>
+      <p class="lede">Scan an hour-plus episode by the moments that matter instead of scrubbing a long timeline. Jump between chapters, speakers, captions, and warnings, mark each as you go, and keep your place &mdash; the list stays calm and only what's left shows up first.</p>
+
+      <div class="toolbar">
+        <label>Show lane
+          <select id="laneFilter" aria-label="Filter by lane"></select>
+        </label>
+        <label>Show
+          <select id="stateFilter" aria-label="Filter by state">
+            <option value="all">All moments</option>
+            <option value="open" selected>Still to review</option>
+          </select>
+        </label>
+      </div>
+
+      <section class="workspace" aria-label="Long-form navigation workspace">
+        <div class="panel">
+          <h2>Episode moments</h2>
+          <div class="moments" id="moments"></div>
+          <div class="actions">
+            <button type="button" class="secondary" id="reset">Reset sample</button>
+          </div>
+        </div>
+
+        <aside class="panel" aria-live="polite" aria-label="Review progress">
+          <h2>Review progress</h2>
+          <div id="status" class="status review">Reviewing</div>
+          <div class="lanes" id="lanes"></div>
+          <p class="summary-note">Moments you mark reviewed, fixed, or not relevant drop out of the default view but stay recoverable.</p>
+        </aside>
+      </section>
+    </main>
+
+    <script>
+      // The review lanes a long episode is scanned by.
+      const lanes = {
+        chapter: "Chapter",
+        speaker: "Speaker",
+        caption: "Caption",
+        broll: "B-roll",
+        title: "Title moment",
+        audio: "Audio",
+        export: "Export",
+        comment: "Comment",
+      };
+
+      // Per-moment status. "new" and "snoozed" still need attention; the rest are handled.
+      const statuses = {
+        new: "New",
+        reviewed: "Reviewed",
+        fixed: "Fixed",
+        ignored: "Not relevant",
+        snoozed: "Snoozed",
+      };
+
+      const handledStatuses = new Set(["reviewed", "fixed", "ignored"]);
+
+      const sampleMoments = [
+        { id: "m1", at: "00:02:15", lane: "chapter", reason: "“Cold open: the launch story”", status: "new" },
+        { id: "m2", at: "00:08:40", lane: "caption", reason: "Caption confidence is low on a guest name", status: "new" },
+        { id: "m3", at: "00:14:05", lane: "speaker", reason: "Guest 2 joins the conversation", status: "reviewed" },
+        { id: "m4", at: "00:21:30", lane: "broll", reason: "B-roll suggested for the product mention", status: "new" },
+        { id: "m5", at: "00:33:12", lane: "audio", reason: "Cross-talk makes a line hard to hear", status: "snoozed" },
+        { id: "m6", at: "00:41:50", lane: "title", reason: "Title moment: “Why they almost quit”", status: "new" },
+        { id: "m7", at: "00:52:08", lane: "export", reason: "Sponsor mark near the lower-third", status: "fixed" },
+        { id: "m8", at: "00:58:44", lane: "comment", reason: "Producer note: confirm the outro CTA", status: "new" },
+      ];
+
+      let moments = structuredClone(sampleMoments);
+      let laneFilter = "all";
+      let stateFilter = "open";
+
+      const momentsElement = document.querySelector("#moments");
+      const statusElement = document.querySelector("#status");
+      const lanesElement = document.querySelector("#lanes");
+      const laneFilterElement = document.querySelector("#laneFilter");
+      const stateFilterElement = document.querySelector("#stateFilter");
+
+      laneFilterElement.innerHTML = [`<option value="all">All lanes</option>`]
+        .concat(Object.entries(lanes).map(([value, label]) => `<option value="${value}">${label}</option>`))
+        .join("");
+
+      laneFilterElement.addEventListener("change", (event) => {
+        laneFilter = event.target.value;
+        render();
+      });
+      stateFilterElement.addEventListener("change", (event) => {
+        stateFilter = event.target.value;
+        render();
+      });
+      document.querySelector("#reset").addEventListener("click", () => {
+        moments = structuredClone(sampleMoments);
+        render();
+      });
+
+      const isHandled = (status) => handledStatuses.has(status);
+
+      function render() {
+        const visible = moments.filter((moment) => {
+          if (laneFilter !== "all" && moment.lane !== laneFilter) {
+            return false;
+          }
+          if (stateFilter === "open" && isHandled(moment.status)) {
+            return false;
+          }
+          return true;
+        });
+
+        momentsElement.replaceChildren(
+          ...(visible.length
+            ? visible.map((moment) => renderMoment(moment, moments.indexOf(moment)))
+            : [Object.assign(document.createElement("p"), { className: "summary-note", textContent: "Nothing to review in this view." })]),
+        );
+
+        updateSummary();
+      }
+
+      function updateSummary() {
+        const open = moments.filter((moment) => !isHandled(moment.status));
+        const left = open.length;
+        statusElement.className = `status ${left === 0 ? "ready" : "review"}`;
+        statusElement.textContent = left === 0 ? "All moments reviewed" : `${left} moment${left === 1 ? "" : "s"} to review`;
+
+        // Per-lane count of what's still open, so a creator sees where work remains.
+        const counts = {};
+        for (const moment of open) {
+          counts[moment.lane] = (counts[moment.lane] || 0) + 1;
+        }
+        const rows = Object.entries(lanes)
+          .filter(([lane]) => counts[lane])
+          .map(([lane, label]) => {
+            const row = document.createElement("div");
+            row.className = "lane-row";
+            const name = document.createElement("strong");
+            name.textContent = label;
+            const count = document.createElement("span");
+            count.textContent = `${counts[lane]} open`;
+            row.append(name, count);
+            return row;
+          });
+        lanesElement.replaceChildren(
+          ...(rows.length ? rows : [Object.assign(document.createElement("p"), { className: "summary-note", textContent: "Every lane is clear." })]),
+        );
+      }
+
+      function badge(status) {
+        const span = document.createElement("span");
+        if (isHandled(status)) {
+          span.className = "badge handled";
+          span.textContent = "handled";
+        } else if (status === "snoozed") {
+          span.className = "badge snoozed";
+          span.textContent = "snoozed";
+        } else {
+          span.className = "badge attention";
+          span.textContent = "to review";
+        }
+        return span;
+      }
+
+      function renderMoment(moment, index) {
+        const article = document.createElement("article");
+        article.className = `moment ${isHandled(moment.status) ? "handled" : ""}`;
+
+        const left = document.createElement("div");
+        const time = document.createElement("div");
+        time.className = "time";
+        time.textContent = moment.at;
+        const lane = document.createElement("span");
+        lane.className = "lane";
+        lane.textContent = lanes[moment.lane];
+        left.append(time, lane);
+
+        const middle = document.createElement("div");
+        const reason = document.createElement("div");
+        reason.className = "reason";
+        // The reason is fixed sample copy; textContent keeps rendering safe.
+        reason.textContent = moment.reason;
+        middle.append(reason, badge(moment.status));
+
+        const right = document.createElement("label");
+        right.setAttribute("aria-label", "Mark this moment");
+        const select = document.createElement("select");
+        for (const [value, label] of Object.entries(statuses)) {
+          const option = document.createElement("option");
+          option.value = value;
+          option.textContent = label;
+          option.selected = value === moment.status;
+          select.append(option);
+        }
+        select.addEventListener("change", (event) => {
+          moments[index].status = event.target.value;
+          render();
+        });
+        right.append(select);
+
+        article.append(left, middle, right);
+        return article;
+      }
+
+      render();
+    </script>
+  </body>
+</html>
