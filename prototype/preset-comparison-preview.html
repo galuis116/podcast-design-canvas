@@ -127,8 +127,33 @@
         aspect-ratio: 16 / 9;
         border-radius: 8px;
         overflow: hidden;
-        background: linear-gradient(160deg, #6db5a8, #1d554d);
+        background: #1d554d;
         box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+      }
+
+      /* Each preset reads as a distinct podcast identity, not a recolour of one look. */
+      .preview-frame.calm-interview {
+        background: linear-gradient(160deg, #6db5a8, #1d554d);
+      }
+
+      .preview-frame.punchy-commentary {
+        background: linear-gradient(150deg, #ff7a59, #3a1d4f 70%);
+      }
+
+      .preview-frame.teaching {
+        background: linear-gradient(165deg, #eaf2f8, #5b7d99);
+      }
+
+      .preview-frame.teaching .person {
+        background: rgba(255, 255, 255, 0.28);
+      }
+
+      .preview-frame.teaching .person::before {
+        background: #ffffff;
+      }
+
+      .preview-frame.punchy-commentary .person::before {
+        background: #ffd76a;
       }
 
       .stage {
@@ -197,6 +222,16 @@
         width: 50%;
         border-radius: 4px;
         background: rgba(255, 255, 255, 0.9);
+      }
+
+      .preview-frame.punchy-commentary .title-chip {
+        height: 22%;
+        width: 66%;
+        background: #ffd76a;
+      }
+
+      .preview-frame.teaching .caption {
+        background: rgba(20, 40, 60, 0.92);
       }
 
       .title-chip.hidden {
@@ -295,7 +330,7 @@
   <body>
     <main>
       <h1>Preset comparison preview</h1>
-      <p class="lede">Preview several polished directions against the same real episode moment and pick the one that fits your show. Compare side by side, choose a direction, and apply it &mdash; no blank canvas required.</p>
+      <p class="lede">Preview several polished directions against the same sample moment and pick the one that fits your show. Each preset is a distinct look &mdash; colour, layout, and pacing &mdash; so you can compare side by side, choose a direction, and apply it without a blank canvas. (Previews use sample speakers to show each direction's feel.)</p>
 
       <div class="toolbar">
         <label>Preview moment
@@ -309,7 +344,7 @@
       <div class="footer">
         <button type="button" class="apply" id="apply">Apply chosen preset</button>
         <button type="button" class="secondary" id="reset">Reset</button>
-        <span class="note">Previews use your real episode's speakers, not stock content.</span>
+        <span class="note">Previews use sample speakers and a fixed moment to compare each direction's feel.</span>
       </div>
     </main>
 
@@ -331,9 +366,9 @@
         },
         teaching: {
           label: "Teaching focused",
-          fit: "Clear captions, calm visuals",
-          density: "balanced", caption: "high", brand: "neutral",
-          signals: ["Clear captions", "Calm visuals", "Neutral brand"],
+          fit: "One presenter, big readable captions",
+          density: "simple", caption: "high", brand: "neutral",
+          signals: ["Single presenter", "Big captions", "Neutral brand"],
         },
       };
 
@@ -406,7 +441,8 @@
         fit.textContent = preset.fit;
 
         const frame = document.createElement("div");
-        frame.className = "preview-frame";
+        // The preset key themes the frame (distinct colours/layout per direction).
+        frame.className = `preview-frame ${key}`;
         const people = preset.density === "simple" ? 1 : 2;
         const persons = Array.from({ length: people }, () => `<div class="person"></div>`).join("");
         // Built only from controlled class names derived from the preset/moment — no user
